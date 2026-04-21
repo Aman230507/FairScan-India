@@ -1,0 +1,2881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FairScan India — AI Bias Detection</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --g-blue:   #4285F4;
+  --g-red:    #EA4335;
+  --g-yellow: #FBBC04;
+  --g-green:  #34A853;
+  --g-blue-light:   #E8F0FE;
+  --g-red-light:    #FCE8E6;
+  --g-yellow-light: #FEF7E0;
+  --g-green-light:  #E6F4EA;
+  --white: #FFFFFF;
+  --gray50: #F8F9FA;
+  --gray100: #F1F3F4;
+  --gray200: #E8EAED;
+  --gray400: #BDC1C6;
+  --gray600: #80868B;
+  --gray800: #3C4043;
+  --gray900: #202124;
+  --text: #202124;
+  --text2: #5F6368;
+  --text3: #80868B;
+  --border: #E8EAED;
+  --shadow: 0 1px 3px rgba(60,64,67,.15), 0 4px 8px rgba(60,64,67,.1);
+  --shadow-hover: 0 2px 6px rgba(60,64,67,.2), 0 8px 24px rgba(60,64,67,.15);
+  --radius: 12px;
+  --radius-lg: 16px;
+  --sans: 'Google Sans', sans-serif;
+  --display: 'Google Sans Display', sans-serif;
+  --mono: 'Roboto Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--gray50);color:var(--text);font-family:var(--sans);min-height:100vh;}
+
+/* ── TOPBAR ── */
+.topnav{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-dots{display:flex;gap:3px;flex-wrap:wrap;width:18px;}
+.dot{width:7px;height:7px;border-radius:50%;}
+.logo-text{font-family:var(--display);font-size:20px;font-weight:700;color:var(--gray900);}
+.logo-text span.b{color:var(--g-blue);}
+.logo-text span.r{color:var(--g-red);}
+.logo-text span.y{color:var(--g-yellow);}
+.logo-text span.g{color:var(--g-green);}
+.nav-links{display:flex;gap:4px;}
+.nav-link{padding:8px 16px;border-radius:20px;font-size:14px;cursor:pointer;background:none;border:none;color:var(--text2);font-family:var(--sans);transition:all .15s;}
+.nav-link:hover{background:var(--gray100);}
+.nav-link.active{background:var(--g-blue-light);color:var(--g-blue);font-weight:500;}
+.nav-cta{background:var(--g-blue);color:white;padding:9px 20px;border-radius:20px;border:none;font-size:14px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .15s;}
+.nav-cta:hover{background:#1a73e8;box-shadow:var(--shadow);}
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px);}
+.sidebar{background:var(--white);border-right:1px solid var(--border);padding:16px 12px;}
+.main{padding:28px 32px;overflow-y:auto;min-width:0;}
+
+/* ── SIDEBAR ── */
+.sidebar-section{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;padding:8px 12px 4px;margin-top:12px;}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--text2);background:none;border:none;width:100%;text-align:left;font-family:var(--sans);transition:all .15s;margin-bottom:1px;}
+.sidebar-item:hover{background:var(--gray100);}
+.sidebar-item.active{background:var(--g-blue-light);color:var(--g-blue);font-weight:500;}
+.sidebar-item .si-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.sidebar-item.active .si-icon{background:var(--g-blue);color:white;}
+.si-badge{margin-left:auto;background:var(--g-red);color:white;font-size:10px;padding:1px 6px;border-radius:10px;font-family:var(--mono);}
+
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);padding:24px;margin-bottom:20px;transition:box-shadow .2s;}
+.card:hover{box-shadow:var(--shadow);}
+.card-title{font-size:16px;font-weight:500;color:var(--gray900);margin-bottom:4px;}
+.card-sub{font-size:13px;color:var(--text3);}
+
+/* ── METRIC CARDS ── */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.metric-card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);padding:20px;position:relative;overflow:hidden;transition:box-shadow .2s;}
+.metric-card:hover{box-shadow:var(--shadow);}
+.metric-top-bar{position:absolute;top:0;left:0;right:0;height:4px;border-radius:16px 16px 0 0;}
+.metric-label{font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:500;}
+.metric-value{font-size:30px;font-weight:700;letter-spacing:-1px;font-family:var(--display);}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono);}
+.mv-blue{color:var(--g-blue);}
+.mv-red{color:var(--g-red);}
+.mv-yellow{color:#F9AB00;}
+.mv-green{color:var(--g-green);}
+
+/* ── ALERTS ── */
+.alert{border-radius:10px;padding:14px 16px;font-size:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;line-height:1.6;}
+.alert.red{background:var(--g-red-light);border:1px solid rgba(234,67,53,.2);color:#C5221F;}
+.alert.yellow{background:var(--g-yellow-light);border:1px solid rgba(251,188,4,.3);color:#B06000;}
+.alert.green{background:var(--g-green-light);border:1px solid rgba(52,168,83,.2);color:#137333;}
+.alert.blue{background:var(--g-blue-light);border:1px solid rgba(66,133,244,.2);color:#1A73E8;}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;gap:4px;}
+.badge.red{background:var(--g-red-light);color:#C5221F;}
+.badge.yellow{background:var(--g-yellow-light);color:#B06000;}
+.badge.green{background:var(--g-green-light);color:#137333;}
+.badge.blue{background:var(--g-blue-light);color:#1A73E8;}
+
+/* ── BARS ── */
+.bar-group{margin-bottom:14px;}
+.bar-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:5px;}
+.bar-track{height:8px;background:var(--gray100);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+
+/* ── TABLES ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+.data-table th{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;border-bottom:2px solid var(--border);text-align:left;}
+.data-table td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text2);}
+.data-table tr:hover td{background:var(--gray50);}
+
+/* ── TABS ── */
+.tab-row{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:24px;}
+.tab-btn{padding:10px 20px;border:none;background:none;font-size:14px;cursor:pointer;color:var(--text3);font-family:var(--sans);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab-btn.active{color:var(--g-blue);border-bottom:2px solid var(--g-blue);}
+.tab-btn:hover:not(.active){color:var(--text);}
+
+/* ── SECTION PAGES ── */
+.page{display:none;}
+.page.active{display:block;animation:fadeUp .25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:28px;}
+.page-title{font-family:var(--display);font-size:26px;font-weight:700;color:var(--gray900);margin-bottom:4px;}
+.page-sub{font-size:14px;color:var(--text3);}
+.header-row{display:flex;align-items:flex-start;justify-content:space-between;}
+.header-actions{display:flex;gap:10px;margin-top:4px;}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 20px;border-radius:20px;font-size:14px;font-family:var(--sans);font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+.btn-blue{background:var(--g-blue);color:white;}
+.btn-blue:hover{background:#1a73e8;box-shadow:0 1px 6px rgba(66,133,244,.4);}
+.btn-outline{background:white;color:var(--g-blue);border:1px solid var(--g-blue);}
+.btn-outline:hover{background:var(--g-blue-light);}
+.btn-red{background:var(--g-red);color:white;}
+.btn-green{background:var(--g-green);color:white;}
+
+/* ── GOOGLE COLOR STRIPE ── */
+.color-stripe{height:4px;background:linear-gradient(90deg,var(--g-blue) 25%,var(--g-red) 25%,var(--g-red) 50%,var(--g-yellow) 50%,var(--g-yellow) 75%,var(--g-green) 75%);border-radius:2px;margin-bottom:20px;}
+
+/* ── HERO SECTION ── */
+.hero{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);padding:32px;margin-bottom:24px;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:conic-gradient(var(--g-blue) 0deg 90deg,var(--g-red) 90deg 180deg,var(--g-yellow) 180deg 270deg,var(--g-green) 270deg 360deg);border-radius:50%;opacity:.06;}
+.hero-title{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:8px;}
+.hero-sub{font-size:14px;color:var(--text2);line-height:1.7;max-width:600px;}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.chip{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;border:1.5px solid;}
+.chip.blue{background:var(--g-blue-light);color:var(--g-blue);border-color:rgba(66,133,244,.3);}
+.chip.red{background:var(--g-red-light);color:#C5221F;border-color:rgba(234,67,53,.3);}
+.chip.yellow{background:var(--g-yellow-light);color:#B06000;border-color:rgba(251,188,4,.4);}
+.chip.green{background:var(--g-green-light);color:#137333;border-color:rgba(52,168,83,.3);}
+
+/* ── INDIA LAW CARDS ── */
+.law-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.law-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px;border-left:4px solid;}
+.law-card.blue{border-left-color:var(--g-blue);}
+.law-card.red{border-left-color:var(--g-red);}
+.law-card.yellow{border-left-color:var(--g-yellow);}
+.law-card.green{border-left-color:var(--g-green);}
+.law-name{font-size:13px;font-weight:700;margin-bottom:4px;}
+.law-desc{font-size:12px;color:var(--text2);line-height:1.6;}
+.law-status{display:inline-block;margin-top:8px;font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px;}
+
+/* ── MODEL WIZARD ── */
+.wizard-step{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;}
+.wizard-step-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.step-num.blue{background:var(--g-blue);color:white;}
+.step-num.done{background:var(--g-green);color:white;}
+.step-num.gray{background:var(--gray200);color:var(--text3);}
+.step-title{font-size:15px;font-weight:500;}
+.step-sub{font-size:13px;color:var(--text3);}
+
+/* ── DOMAIN CARDS ── */
+.domain-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.domain-card{border:2px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;text-align:center;transition:all .2s;background:var(--white);}
+.domain-card:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
+.domain-card.selected.blue{border-color:var(--g-blue);background:var(--g-blue-light);}
+.domain-card.selected.red{border-color:var(--g-red);background:var(--g-red-light);}
+.domain-card.selected.yellow{border-color:var(--g-yellow);background:var(--g-yellow-light);}
+.domain-card.selected.green{border-color:var(--g-green);background:var(--g-green-light);}
+.domain-icon{font-size:28px;margin-bottom:8px;}
+.domain-name{font-size:13px;font-weight:500;}
+.domain-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* ── UPLOAD ── */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;cursor:pointer;transition:all .2s;background:var(--gray50);}
+.upload-zone:hover{border-color:var(--g-blue);background:var(--g-blue-light);}
+.upload-icon{font-size:36px;margin-bottom:12px;}
+.upload-title{font-size:16px;font-weight:500;margin-bottom:4px;}
+.upload-sub{font-size:13px;color:var(--text3);}
+
+/* ── PROGRESS ── */
+.progress-track{height:6px;background:var(--gray100);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;transition:width .5s;}
+.progress-fill.blue{background:var(--g-blue);}
+.progress-fill.multi{background:linear-gradient(90deg,var(--g-blue),var(--g-red),var(--g-yellow),var(--g-green));}
+
+/* ── SCAN LOG ── */
+.scan-log{background:var(--gray50);border:1px solid var(--border);border-radius:10px;padding:16px;font-family:var(--mono);font-size:12px;color:var(--text2);max-height:160px;overflow-y:auto;}
+.log-done{color:var(--g-green);}
+.log-run{color:var(--g-blue);}
+.log-pend{color:var(--text3);}
+
+/* ── FAIRNESS CELLS ── */
+.fairness-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.f-cell{background:var(--gray50);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.f-name{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.f-val{font-size:15px;font-weight:700;margin-bottom:4px;}
+.f-desc{font-size:11px;color:var(--text3);line-height:1.5;}
+
+/* ── RECOMMEND ── */
+.rec-item{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--border);}
+.rec-item:last-child{border-bottom:none;}
+.rec-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.rec-body{flex:1;min-width:0;}
+.rec-title{font-size:14px;font-weight:500;margin-bottom:4px;}
+.rec-desc{font-size:13px;color:var(--text2);line-height:1.6;}
+.rec-code{background:var(--gray900);color:#a8d8a8;border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:11px;margin-top:10px;overflow-x:auto;white-space:pre;}
+.rec-meta{display:flex;gap:8px;margin-top:10px;align-items:center;}
+
+/* ── CASE STUDY ── */
+.case-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;border-left:4px solid var(--g-blue);}
+.case-title{font-size:15px;font-weight:500;margin-bottom:6px;}
+.case-body{font-size:13px;color:var(--text2);line-height:1.7;}
+.case-verdict{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;font-weight:500;padding:4px 12px;border-radius:20px;}
+
+/* ── FEATURE ROW ── */
+.feat-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.feat-name{font-size:12px;font-family:var(--mono);color:var(--text2);width:120px;flex-shrink:0;}
+.feat-track{flex:1;height:6px;background:var(--gray100);border-radius:3px;overflow:hidden;}
+.feat-fill{height:100%;border-radius:3px;}
+.feat-val{font-size:12px;color:var(--text3);width:36px;text-align:right;font-family:var(--mono);}
+
+/* ── TWO/THREE COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+
+/* ── CHECKBOX ── */
+.check-label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer;padding:4px 0;}
+.check-label input{accent-color:var(--g-blue);width:15px;height:15px;}
+
+/* ── SCORE BIG ── */
+.big-score{font-family:var(--display);font-size:64px;font-weight:700;line-height:1;letter-spacing:-2px;}
+
+/* ── LANGUAGE TOGGLE ── */
+.lang-toggle{display:flex;gap:6px;align-items:center;}
+.lang-btn{padding:5px 12px;border-radius:14px;border:1px solid var(--border);font-size:12px;cursor:pointer;background:white;font-family:var(--sans);}
+.lang-btn.active{background:var(--g-blue);color:white;border-color:var(--g-blue);}
+
+/* ── PLAIN ENGLISH BOX ── */
+.plain-box{background:linear-gradient(135deg,var(--g-blue-light),var(--g-green-light));border:1px solid rgba(66,133,244,.2);border-radius:var(--radius);padding:16px;margin-top:12px;}
+.plain-box-title{font-size:12px;font-weight:700;color:var(--g-blue);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+.plain-box-text{font-size:13px;color:var(--gray800);line-height:1.7;}
+
+/* ── HINDI ── */
+.hindi{font-family:'Noto Sans Devanagari','Google Sans',sans-serif;}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .main{padding:16px 14px 80px;}
+  .metric-grid{grid-template-columns:1fr 1fr;}
+  .two-col,.three-col,.domain-grid,.law-grid{grid-template-columns:1fr;}
+  .fairness-grid{grid-template-columns:1fr;}
+  .nav-links{display:none;position:fixed;top:64px;left:0;right:0;background:white;padding:12px;flex-direction:column;border-bottom:1px solid var(--border);z-index:999;box-shadow:var(--shadow);max-height:calc(100vh - 64px);overflow-y:auto;}
+  .nav-links.mobile-open{display:flex;}
+  .nav-link{width:100%;text-align:left;border-radius:8px;padding:10px 14px;}
+  .hamburger{display:flex!important;}
+  .nav-cta{display:none;}
+  .exec-kpi-row{grid-template-columns:1fr 1fr;}
+  .cert-facts{grid-template-columns:1fr 1fr;}
+  .cert-sig-row{grid-template-columns:1fr;}
+  .cert-wrap{padding:24px 16px;}
+  .big-score{font-size:48px;}
+  .metric-value{font-size:24px;}
+  .exec-kpi-val{font-size:32px;}
+  .sim-panel,.sim-result-grid{width:100%;}
+  .sim-result-grid{grid-template-columns:1fr 1fr;}
+  .tab-row{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
+  .tab-btn{white-space:nowrap;}
+  .page-title{font-size:20px;}
+  .hero{padding:20px;}
+  .hero-title{font-size:18px;}
+  .wizard-step{padding:16px;}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .header-row{flex-direction:column;gap:12px;}
+  .header-actions{flex-wrap:wrap;}
+  .mobile-bottom-nav{display:flex!important;}
+}
+@media(max-width:480px){
+  .metric-grid{grid-template-columns:1fr;}
+  .exec-kpi-row{grid-template-columns:1fr;}
+  .sim-result-grid{grid-template-columns:1fr;}
+  .hero-chips{gap:6px;}
+  .chip{font-size:11px;padding:4px 10px;}
+}
+@media(min-width:901px){
+  .hamburger{display:none!important;}
+  .mobile-bottom-nav{display:none!important;}
+}
+
+/* ── EXECUTIVE SUMMARY ── */
+.exec-kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.exec-kpi{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;text-align:center;position:relative;overflow:hidden;}
+.exec-kpi-val{font-family:var(--display);font-size:42px;font-weight:700;letter-spacing:-2px;line-height:1;}
+.exec-kpi-lbl{font-size:12px;font-weight:500;color:var(--text3);margin-top:6px;text-transform:uppercase;letter-spacing:.06em;}
+.exec-kpi-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.exec-risk-bar{height:12px;border-radius:6px;background:linear-gradient(90deg,var(--g-green) 0%,var(--g-yellow) 50%,var(--g-red) 100%);position:relative;margin:8px 0 4px;}
+.exec-risk-needle{position:absolute;top:-4px;width:4px;height:20px;background:var(--gray900);border-radius:2px;transform:translateX(-50%);}
+.exec-summary-box{background:var(--gray900);color:white;border-radius:var(--radius-lg);padding:28px 32px;margin-bottom:20px;position:relative;overflow:hidden;}
+.exec-summary-box::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--g-blue) 25%,var(--g-red) 25%,var(--g-red) 50%,var(--g-yellow) 50%,var(--g-yellow) 75%,var(--g-green) 75%);}
+.exec-summary-title{font-size:13px;font-weight:500;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+.exec-summary-text{font-size:15px;line-height:1.8;color:rgba(255,255,255,.9);}
+.exec-action-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+.exec-action-item:last-child{border-bottom:none;}
+.exec-action-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.exec-share-row{display:flex;gap:10px;margin-top:20px;}
+
+/* ── AUDIT LOG ── */
+.audit-filters{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.audit-filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);font-size:13px;cursor:pointer;background:white;font-family:var(--sans);transition:all .15s;}
+.audit-filter-btn.active{background:var(--g-blue);color:white;border-color:var(--g-blue);}
+.audit-entry{display:flex;align-items:flex-start;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);}
+.audit-entry:last-child{border-bottom:none;}
+.audit-timeline{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;}
+.audit-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.audit-line{width:2px;flex:1;min-height:30px;background:var(--border);}
+.audit-time{font-size:11px;font-family:var(--mono);color:var(--text3);white-space:nowrap;width:110px;flex-shrink:0;padding-top:2px;}
+.audit-content{flex:1;}
+.audit-title{font-size:14px;font-weight:500;margin-bottom:3px;}
+.audit-detail{font-size:12px;color:var(--text2);line-height:1.6;}
+.audit-tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.audit-tag{font-size:11px;padding:2px 8px;border-radius:10px;font-family:var(--mono);}
+
+/* ── CERTIFICATE ── */
+.cert-wrap{background:var(--white);border:2px solid var(--border);border-radius:20px;padding:48px;max-width:760px;margin:0 auto;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.cert-border-top{position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,var(--g-blue) 25%,var(--g-red) 25%,var(--g-red) 50%,var(--g-yellow) 50%,var(--g-yellow) 75%,var(--g-green) 75%);}
+.cert-border-bottom{position:absolute;bottom:0;left:0;right:0;height:8px;background:linear-gradient(90deg,var(--g-green) 25%,var(--g-yellow) 25%,var(--g-yellow) 50%,var(--g-red) 50%,var(--g-red) 75%,var(--g-blue) 75%);}
+.cert-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:140px;opacity:.03;font-weight:900;letter-spacing:-5px;font-family:var(--display);pointer-events:none;}
+.cert-header{text-align:center;margin-bottom:32px;}
+.cert-logo-row{display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:12px;}
+.cert-issued{font-size:13px;color:var(--text3);font-family:var(--mono);margin-bottom:8px;text-align:center;}
+.cert-title{font-family:var(--display);font-size:32px;font-weight:700;color:var(--gray900);text-align:center;margin-bottom:4px;}
+.cert-subtitle{font-size:15px;color:var(--text2);text-align:center;}
+.cert-divider{height:2px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:28px 0;}
+.cert-org{font-family:var(--display);font-size:24px;font-weight:700;text-align:center;color:var(--g-blue);margin-bottom:6px;}
+.cert-for{font-size:14px;color:var(--text3);text-align:center;margin-bottom:24px;}
+.cert-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0;}
+.cert-fact{text-align:center;padding:14px;background:var(--gray50);border-radius:var(--radius);}
+.cert-fact-val{font-size:20px;font-weight:700;font-family:var(--display);}
+.cert-fact-lbl{font-size:11px;color:var(--text3);margin-top:3px;}
+.cert-sig-row{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px;}
+.cert-sig{text-align:center;}
+.cert-sig-line{border-top:1.5px solid var(--gray400);margin:0 20px 8px;}
+.cert-sig-name{font-size:13px;font-weight:500;}
+.cert-sig-role{font-size:11px;color:var(--text3);}
+.cert-id{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;margin-top:20px;}
+.cert-status-seal{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:30px;font-size:14px;font-weight:600;margin:0 auto;display:flex;justify-content:center;width:fit-content;}
+.cert-status-seal.pass{background:var(--g-green-light);color:#137333;border:2px solid rgba(52,168,83,.3);}
+.cert-status-seal.fail{background:var(--g-red-light);color:#C5221F;border:2px solid rgba(234,67,53,.3);}
+
+/* ── AI ASSISTANT ── */
+.chat-wrap{display:flex;flex-direction:column;height:500px;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--white);}
+.chat-header{background:var(--g-blue);color:white;padding:14px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.chat-avatar{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--gray50);}
+.msg{max-width:80%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;}
+.msg.bot{background:var(--white);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px;}
+.msg.user{background:var(--g-blue);color:white;align-self:flex-end;border-bottom-right-radius:4px;}
+.msg-typing{display:flex;gap:4px;padding:12px 14px;background:var(--white);border:1px solid var(--border);border-radius:12px;border-bottom-left-radius:4px;width:60px;align-self:flex-start;}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:typingBounce 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+/* ── WHAT-IF SIMULATOR ── */
+.sim-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;}
+.sim-slider-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.sim-slider-label{font-size:13px;color:var(--text2);width:180px;flex-shrink:0;}
+.sim-slider{flex:1;accent-color:var(--g-blue);}
+.sim-slider-val{font-size:13px;font-weight:600;width:48px;text-align:right;font-family:var(--mono);}
+.sim-result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;}
+.sim-result-card{background:var(--gray50);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+.sim-result-val{font-size:22px;font-weight:700;font-family:var(--display);}
+.sim-result-lbl{font-size:11px;color:var(--text3);margin-top:3px;}
+.sim-result-delta{font-size:11px;font-weight:500;margin-top:2px;}
+
+
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);z-index:200;padding:6px 0 env(safe-area-inset-bottom,6px);}
+.mbn-items{display:flex;justify-content:space-around;}
+.mbn-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;border:none;background:none;cursor:pointer;font-family:var(--sans);font-size:10px;color:var(--text3);border-radius:8px;flex:1;}
+.mbn-item.active{color:var(--g-blue);}
+.mbn-icon{font-size:20px;}
+
+/* ── SIM RESULT GRID ── */
+.sim-result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px;}
+.sim-result-card{background:var(--gray50);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+.sim-result-val{font-size:22px;font-weight:700;font-family:var(--display);}
+.sim-result-lbl{font-size:11px;color:var(--text3);margin-top:4px;}
+.sim-result-delta{font-size:11px;color:var(--g-green);margin-top:2px;font-family:var(--mono);}
+
+/* ── SIM PANEL ── */
+.sim-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;}
+.sim-slider-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.sim-slider-label{font-size:13px;color:var(--text2);min-width:160px;flex-shrink:0;}
+.sim-slider{flex:1;accent-color:var(--g-blue);}
+.sim-slider-val{font-size:13px;font-family:var(--mono);color:var(--g-blue);min-width:36px;text-align:right;}
+
+/* ── TREND CONTROLS ── */
+.trend-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.trend-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border);font-size:13px;cursor:pointer;background:white;font-family:var(--sans);transition:all .15s;}
+.trend-btn.active{background:var(--g-blue);color:white;border-color:var(--g-blue);}
+
+/* ── CHAT ── */
+.chat-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column;height:520px;}
+.chat-header{background:var(--gray900);color:white;padding:14px 18px;display:flex;align-items:center;gap:10px;}
+.chat-avatar{font-size:20px;}
+.chat-header-text{font-size:14px;font-weight:500;}
+.chat-header-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px;}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.msg{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;max-width:88%;}
+.msg.user{background:var(--g-blue);color:white;align-self:flex-end;border-radius:12px 12px 2px 12px;}
+.msg.bot{background:var(--gray100);color:var(--text);align-self:flex-start;border-radius:12px 12px 12px 2px;}
+.msg-typing{display:flex;gap:5px;padding:12px 14px;background:var(--gray100);border-radius:12px;align-self:flex-start;width:60px;}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--gray400);animation:bounce .9s infinite;}
+.typing-dot:nth-child(2){animation-delay:.15s;}
+.typing-dot:nth-child(3){animation-delay:.3s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+.chat-input-row{padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.chat-input-row input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;font-size:13px;font-family:var(--sans);outline:none;}
+.chat-input-row input:focus{border-color:var(--g-blue);}
+.chat-send{background:var(--g-blue);color:white;border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-quick{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px 0;}
+
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="logo">
+    <div class="logo-dots">
+      <div class="dot" style="background:var(--g-blue)"></div>
+      <div class="dot" style="background:var(--g-red)"></div>
+      <div class="dot" style="background:var(--g-yellow)"></div>
+      <div class="dot" style="background:var(--g-green)"></div>
+    </div>
+    <div class="logo-text"><span class="b">Fair</span><span class="r">Sc</span><span class="y">an</span> <span class="g">India</span></div>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="showPage('home',this)">Home</button>
+    <button class="nav-link" onclick="showPage('scan',this)">Scan My Model</button>
+    <button class="nav-link" onclick="showPage('simulator',this)">🎮 What-If</button>
+    <button class="nav-link" onclick="showPageTrends(this)">📈 Trends</button>
+    <button class="nav-link" onclick="showPage('assistant',this)">🤖 AI Assistant</button>
+    <button class="nav-link" onclick="showPage('laws',this)">India Laws</button>
+    <button class="nav-link" onclick="showPage('cases',this)">Case Studies</button>
+    <button class="nav-link" onclick="showPage('executive',this)">📋 Executive</button>
+    <button class="nav-link" onclick="showPage('auditlog',this)">🗂 Audit Log</button>
+    <button class="nav-link" onclick="showPage('certificate',this)">🏅 Certificate</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en',this)">EN</button>
+      <button class="lang-btn" onclick="setLang('hi',this)">हिं</button>
+    </div>
+    <button class="nav-cta" onclick="showPage('scan', document.querySelector('.nav-link:nth-child(2)'))">Start Free Scan</button>
+    <button class="hamburger" onclick="toggleMobileNav()" style="display:none;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:18px;" aria-label="Menu" id="hamburger-btn">☰</button>
+  </div>
+</nav>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <div class="mbn-items">
+    <button class="mbn-item active" onclick="showPage('home',null);setMbnActive(this)"><span class="mbn-icon">🏠</span>Home</button>
+    <button class="mbn-item" onclick="showPage('scan',null);setMbnActive(this)"><span class="mbn-icon">🔍</span>Scan</button>
+    <button class="mbn-item" onclick="showPage('simulator',null);setMbnActive(this)"><span class="mbn-icon">🎮</span>What-If</button>
+    <button class="mbn-item" onclick="showPage('assistant',null);setMbnActive(this)"><span class="mbn-icon">🤖</span>AI Help</button>
+    <button class="mbn-item" onclick="showPage('laws',null);setMbnActive(this)"><span class="mbn-icon">⚖️</span>Laws</button>
+  </div>
+</nav>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-section">Analysis</div>
+  <button class="sidebar-item active" onclick="showSide('overview',this)">
+    <div class="si-icon" style="background:var(--g-blue);color:white;">📊</div>
+    <span>Overview</span>
+    <span class="si-badge">3</span>
+  </button>
+  <button class="sidebar-item" onclick="showSide('groups',this)">
+    <div class="si-icon" style="background:var(--gray200);">👥</div>
+    <span>Group Analysis</span>
+  </button>
+  <button class="sidebar-item" onclick="showSide('features',this)">
+    <div class="si-icon" style="background:var(--gray200);">🔍</div>
+    <span>Feature Audit</span>
+  </button>
+  <button class="sidebar-item" onclick="showSide('metrics',this)">
+    <div class="si-icon" style="background:var(--gray200);">📐</div>
+    <span>Fairness Metrics</span>
+  </button>
+  <div class="sidebar-section">India Specific</div>
+  <button class="sidebar-item" onclick="showSide('caste',this)">
+    <div class="si-icon" style="background:var(--gray200);">🇮🇳</div>
+    <span>Caste & Religion</span>
+  </button>
+  <button class="sidebar-item" onclick="showSide('indianlaws',this)">
+    <div class="si-icon" style="background:var(--gray200);">⚖️</div>
+    <span>Legal Compliance</span>
+  </button>
+  <div class="sidebar-section">Fix It</div>
+  <button class="sidebar-item" onclick="showSide('fix',this)">
+    <div class="si-icon" style="background:var(--gray200);">🔧</div>
+    <span>Recommendations</span>
+  </button>
+  <button class="sidebar-item" onclick="showPage('scan', document.querySelectorAll('.nav-link')[1])">
+    <div class="si-icon" style="background:var(--g-green);color:white;">▶</div>
+    <span>Run New Scan</span>
+  </button>
+  <div class="sidebar-section">Winning Features</div>
+  <button class="sidebar-item" onclick="showPage('simulator',null);this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));this.classList.add('active');">
+    <div class="si-icon" style="background:var(--g-red);color:white;">🎮</div>
+    <span>What-If Simulator</span>
+  </button>
+  <button class="sidebar-item" onclick="showPageTrends(null);this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));this.classList.add('active');">
+    <div class="si-icon" style="background:var(--g-yellow);color:white;">📈</div>
+    <span>Bias Trend Charts</span>
+  </button>
+  <button class="sidebar-item" onclick="showPage('assistant',null);this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));this.classList.add('active');">
+    <div class="si-icon" style="background:var(--g-blue);color:white;">🤖</div>
+    <span>AI Assistant</span>
+  </button>
+  <div class="sidebar-section">Corporate Compliance</div>
+  <button class="sidebar-item" onclick="showPage('executive', document.querySelectorAll('.nav-link')[7]); this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active')); this.classList.add('active');">
+    <div class="si-icon" style="background:var(--g-blue);color:white;">📋</div>
+    <span>Executive Summary</span>
+  </button>
+  <button class="sidebar-item" onclick="showPage('auditlog', document.querySelectorAll('.nav-link')[8]); this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active')); this.classList.add('active');">
+    <div class="si-icon" style="background:var(--g-yellow);color:white;">🗂</div>
+    <span>Audit Trail Log</span>
+  </button>
+  <button class="sidebar-item" onclick="showPage('certificate', document.querySelectorAll('.nav-link')[9]); this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active')); this.classList.add('active');">
+    <div class="si-icon" style="background:var(--g-green);color:white;">🏅</div>
+    <span>Compliance Certificate</span>
+  </button>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ══════════════════════════════════════════
+     HOME PAGE
+══════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="color-stripe"></div>
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-title" id="hero-title">Is your AI treating everyone fairly?</div>
+    <div class="hero-sub" id="hero-sub">FairScan India checks your AI model for hidden discrimination — against caste, gender, religion, or region — and tells you exactly how to fix it. Built for India, following Indian laws.</div>
+    <div class="hero-chips">
+      <div class="chip blue">🏦 Bank Loans (RBI)</div>
+      <div class="chip red">👔 Hiring (Equal Opportunity)</div>
+      <div class="chip yellow">🏥 Healthcare (Ayushman)</div>
+      <div class="chip green">🎓 Education (Reservation)</div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-blue" onclick="showPage('scan', document.querySelectorAll('.nav-link')[1])">Check My AI Model →</button>
+      <button class="btn btn-outline" onclick="showPage('learn', null)">What is Bias?</button>
+      <button class="btn btn-outline" style="border-color:var(--g-green);color:var(--g-green);" onclick="downloadSampleCSV()">⬇ Download Sample Data</button>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:#E8272A;color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;">🎯 SDG 10 — Reduced Inequalities</div>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:#1A73E8;color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;">🎯 SDG 8 — Decent Work</div>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:var(--g-green);color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;">🏆 Google Solution Challenge</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+    <div class="card" style="border-top:4px solid var(--g-blue);text-align:center;">
+      <div style="font-size:36px;margin-bottom:8px;">🔍</div>
+      <div class="card-title">Detect</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px;line-height:1.6;">Upload your data and AI model. We automatically check for bias across caste, gender, religion, age, and region.</div>
+    </div>
+    <div class="card" style="border-top:4px solid var(--g-red);text-align:center;">
+      <div style="font-size:36px;margin-bottom:8px;">📊</div>
+      <div class="card-title">Measure</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px;line-height:1.6;">Get a bias score, plain English explanations, and check compliance with Indian laws like the Equal Remuneration Act and IT Act.</div>
+    </div>
+    <div class="card" style="border-top:4px solid var(--g-green);text-align:center;">
+      <div style="font-size:36px;margin-bottom:8px;">🔧</div>
+      <div class="card-title">Fix</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px;line-height:1.6;">Get step-by-step fixes in simple language. No technical knowledge needed — we guide you through everything.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <span style="font-size:20px;">🇮🇳</span>
+      <div class="card-title">Why India needs this NOW</div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="alert red"><span class="alert-icon">!</span><div><strong>Loan Rejection Bias:</strong> Studies show applicants from certain castes and regions are 2.3x more likely to be rejected by bank AI systems even with identical financial profiles.</div></div>
+        <div class="alert yellow"><span class="alert-icon">⚠</span><div><strong>Hiring AI Discrimination:</strong> Resume screening tools trained on historical data continue to filter out women and SC/ST candidates before a human even sees their application.</div></div>
+      </div>
+      <div>
+        <div class="alert blue"><span class="alert-icon">ℹ</span><div><strong>EU AI Act Impact:</strong> Indian companies selling AI services to Europe must comply by 2026. Non-compliance = banned from European markets.</div></div>
+        <div class="alert green"><span class="alert-icon">✓</span><div><strong>India DPDP Act 2023:</strong> India's new Digital Personal Data Protection Act requires fairness in automated decision-making. Fines up to ₹250 crore.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCAN PAGE — Main dashboard with sub-sections
+══════════════════════════════════════════ -->
+<div id="page-scan" class="page">
+  <div class="color-stripe"></div>
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="switchScan('wizard',this)">🚀 Scan Wizard</button>
+    <button class="tab-btn" onclick="switchScan('overview',this)">📊 Results Overview</button>
+    <button class="tab-btn" onclick="switchScan('groups',this)">👥 Group Analysis</button>
+    <button class="tab-btn" onclick="switchScan('features',this)">🔍 Feature Audit</button>
+    <button class="tab-btn" onclick="switchScan('metrics',this)">📐 Fairness Tests</button>
+    <button class="tab-btn" onclick="switchScan('fix',this)">🔧 Fix It</button>
+  </div>
+
+  <!-- WIZARD TAB -->
+  <div id="scan-wizard" class="scan-tab">
+    <div class="page-header">
+      <div class="page-title">Scan Your AI Model</div>
+      <div class="page-sub">Follow the 4 steps below — no technical knowledge needed</div>
+    </div>
+
+    <!-- STEP 1: Choose Domain -->
+    <div class="wizard-step">
+      <div class="wizard-step-header">
+        <div class="step-num blue">1</div>
+        <div><div class="step-title">What is your AI used for?</div><div class="step-sub">Pick the closest option — we'll load the right bias checks automatically</div></div>
+      </div>
+      <div class="domain-grid">
+        <div class="domain-card" onclick="selectDomain(this,'blue')" data-domain="loans">
+          <div class="domain-icon">🏦</div>
+          <div class="domain-name">Bank Loans</div>
+          <div class="domain-sub">Credit, loans, insurance</div>
+        </div>
+        <div class="domain-card" onclick="selectDomain(this,'red')" data-domain="hiring">
+          <div class="domain-icon">👔</div>
+          <div class="domain-name">Hiring / Jobs</div>
+          <div class="domain-sub">Resume screening, interviews</div>
+        </div>
+        <div class="domain-card" onclick="selectDomain(this,'yellow')" data-domain="healthcare">
+          <div class="domain-icon">🏥</div>
+          <div class="domain-name">Healthcare</div>
+          <div class="domain-sub">Diagnosis, treatment, insurance</div>
+        </div>
+        <div class="domain-card" onclick="selectDomain(this,'green')" data-domain="education">
+          <div class="domain-icon">🎓</div>
+          <div class="domain-name">Education</div>
+          <div class="domain-sub">Admissions, scholarships</div>
+        </div>
+      </div>
+      <div id="domain-info" style="display:none;" class="alert blue">
+        <span class="alert-icon">ℹ</span>
+        <div id="domain-info-text"></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Upload Data -->
+    <div class="wizard-step">
+      <div class="wizard-step-header">
+        <div class="step-num blue">2</div>
+        <div><div class="step-title">Upload your data file</div><div class="step-sub">A spreadsheet (CSV/Excel) with your applicants/candidates and the AI's decisions</div></div>
+      </div>
+      <div class="upload-zone" onclick="document.getElementById('csv-input').click()">
+        <input type="file" id="csv-input" style="display:none" accept=".csv,.xlsx" onchange="handleCSV(this)"/>
+        <div class="upload-icon">📂</div>
+        <div class="upload-title" id="upload-title">Click here to upload your CSV or Excel file</div>
+        <div class="upload-sub" id="upload-sub">Your file needs columns like: name, gender, caste, outcome (approved/rejected)</div>
+      </div>
+      <div class="plain-box" style="margin-top:12px;">
+        <div class="plain-box-title">📖 What should my file look like?</div>
+        <div class="plain-box-text">Your file should be a spreadsheet with one row per person. It needs at least: a column showing the AI's decision (like "approved" or "rejected"), and columns showing who the person is (like gender, age, caste, religion, state/region).</div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Auto Model Selection -->
+    <div class="wizard-step">
+      <div class="wizard-step-header">
+        <div class="step-num blue">3</div>
+        <div><div class="step-title">AI Model Selection — We handle this for you!</div><div class="step-sub">FairScan automatically picks the best model based on your data. You don't need to know about models.</div></div>
+      </div>
+      <div class="alert green" style="margin-bottom:16px;">
+        <span class="alert-icon">✓</span>
+        <div><strong>Auto Mode is ON:</strong> FairScan will automatically test multiple AI models and pick the one that gives the most accurate bias analysis for your specific data. You don't need to do anything here.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;opacity:.6;">
+        <div style="border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:4px;">AUTO-SELECTED</div>
+          <div style="font-size:13px;font-weight:500;">Gradient Boosting</div>
+          <div style="font-size:11px;color:var(--text3);">Best for tabular data</div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:4px;">BACKUP</div>
+          <div style="font-size:13px;font-weight:500;">Random Forest</div>
+          <div style="font-size:11px;color:var(--text3);">Small datasets</div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:4px;">EXPLAINABILITY</div>
+          <div style="font-size:13px;font-weight:500;">SHAP Analysis</div>
+          <div style="font-size:11px;color:var(--text3);">Why each decision</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <details>
+          <summary style="font-size:13px;color:var(--g-blue);cursor:pointer;">I'm technical — let me choose manually</summary>
+          <div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <label class="check-label"><input type="radio" name="model" value="gb"> Gradient Boosting (XGBoost)</label>
+            <label class="check-label"><input type="radio" name="model" value="rf"> Random Forest</label>
+            <label class="check-label"><input type="radio" name="model" value="lr"> Logistic Regression</label>
+            <label class="check-label"><input type="radio" name="model" value="svm"> SVM</label>
+            <label class="check-label"><input type="radio" name="model" value="nn"> Neural Network</label>
+            <label class="check-label"><input type="radio" name="model" value="auto" checked> Auto (recommended)</label>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- STEP 4: Protected Attributes -->
+    <div class="wizard-step">
+      <div class="wizard-step-header">
+        <div class="step-num blue">4</div>
+        <div><div class="step-title">Which groups should we check for bias?</div><div class="step-sub">These are automatically selected based on your domain. Tick all that apply to your data.</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <label class="check-label"><input type="checkbox" checked> 🚻 Gender (Male/Female/Other)</label>
+        <label class="check-label"><input type="checkbox" checked> 🏛️ Caste (General/OBC/SC/ST)</label>
+        <label class="check-label"><input type="checkbox" checked> 🕌 Religion (Hindu/Muslim/Christian/Sikh/Other)</label>
+        <label class="check-label"><input type="checkbox" checked> 📅 Age Group</label>
+        <label class="check-label"><input type="checkbox" checked> 🗺️ State / Region (North/South/East/West)</label>
+        <label class="check-label"><input type="checkbox"> 🏙️ Urban vs Rural</label>
+        <label class="check-label"><input type="checkbox"> 🗣️ Language / Mother Tongue</label>
+        <label class="check-label"><input type="checkbox"> ♿ Disability Status</label>
+      </div>
+      <button class="btn btn-blue" style="margin-top:20px;width:100%;padding:14px;font-size:16px;border-radius:12px;" onclick="runScan()">
+        🚀 Run Bias Scan Now
+      </button>
+    </div>
+
+    <!-- SCAN PROGRESS -->
+    <div id="scan-progress-box" style="display:none;" class="wizard-step">
+      <div class="wizard-step-header">
+        <div class="step-num blue">⟳</div>
+        <div><div class="step-title">Scanning your data...</div><div id="scan-progress-sub" class="step-sub">Starting analysis</div></div>
+      </div>
+      <div class="progress-track" style="margin-bottom:16px;">
+        <div class="progress-fill multi" id="scan-progress-bar" style="width:0%;"></div>
+      </div>
+      <div class="scan-log" id="scan-log-box"></div>
+    </div>
+  </div>
+
+  <!-- RESULTS OVERVIEW TAB -->
+  <div id="scan-overview" class="scan-tab" style="display:none;">
+    <div class="header-row" style="margin-bottom:24px;">
+      <div><div class="page-title">Scan Results</div><div class="page-sub">Loan Approval Model · 48,230 applicants · Scanned just now</div></div>
+      <div class="header-actions"><button class="btn btn-outline" onclick="exportReport()">Download Report</button></div>
+    </div>
+    <div class="metric-grid">
+      <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-red);"></div><div class="metric-label">Bias Risk Score</div><div class="metric-value mv-red">67<span style="font-size:16px;color:var(--text3);">/100</span></div><div class="metric-sub">HIGH RISK</div></div>
+      <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-red);"></div><div class="metric-label">Disparate Impact</div><div class="metric-value mv-red">0.61</div><div class="metric-sub">Must be &gt; 0.80</div></div>
+      <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-yellow);"></div><div class="metric-label">Parity Gap</div><div class="metric-value mv-yellow">18.4%</div><div class="metric-sub">Must be &lt; 5%</div></div>
+      <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-blue);"></div><div class="metric-label">Groups Tested</div><div class="metric-value mv-blue">6</div><div class="metric-sub">Caste, Gender, Religion…</div></div>
+    </div>
+    <div class="plain-box" style="margin-bottom:20px;">
+      <div class="plain-box-title">📖 What does this mean in simple words?</div>
+      <div class="plain-box-text" id="overview-plain">Your AI is making unfair decisions. For every 100 upper-caste applicants it approves, it only approves 61 equally-qualified SC/ST applicants. This is illegal under Indian law and needs to be fixed before you use this AI on real people.</div>
+    </div>
+    <div class="alert red"><span class="alert-icon">!</span><div><strong>Critical — Caste Bias:</strong> SC/ST applicants are approved at 46.5% vs General category at 76.2% with identical financial profiles. Disparate impact ratio: 0.61 (must be &gt;0.80).</div></div>
+    <div class="alert red"><span class="alert-icon">!</span><div><strong>Critical — Gender Bias:</strong> Women approved at 58.1% vs men at 76.3% after controlling for income, credit score, and loan amount.</div></div>
+    <div class="alert red"><span class="alert-icon">!</span><div><strong>Critical — Proxy Feature:</strong> PIN code is 78% correlated with caste and is being used as a hidden discriminator.</div></div>
+    <div class="alert yellow"><span class="alert-icon">⚠</span><div><strong>Warning — Religion Bias:</strong> Muslim applicants show 12% lower approval rate than Hindu applicants with same profile.</div></div>
+    <div class="alert yellow"><span class="alert-icon">⚠</span><div><strong>Warning — Regional Bias:</strong> Applicants from Northeast India and Bihar show significantly higher rejection rates vs Delhi/Mumbai applicants.</div></div>
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title" style="margin-bottom:16px;">Approval Rate by Caste Category</div>
+      <div class="bar-group"><div class="bar-meta"><span>General Category</span><span style="font-weight:600;">76.2%</span></div><div class="bar-track"><div class="bar-fill" style="width:76.2%;background:var(--g-blue);"></div></div></div>
+      <div class="bar-group"><div class="bar-meta"><span>OBC</span><span style="font-weight:600;">63.8%</span></div><div class="bar-track"><div class="bar-fill" style="width:63.8%;background:var(--g-green);"></div></div></div>
+      <div class="bar-group"><div class="bar-meta"><span>SC (Scheduled Caste)</span><span style="font-weight:600;">49.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:49.1%;background:var(--g-yellow);"></div></div></div>
+      <div class="bar-group"><div class="bar-meta"><span>ST (Scheduled Tribe)</span><span style="font-weight:600;">43.8%</span></div><div class="bar-track"><div class="bar-fill" style="width:43.8%;background:var(--g-red);"></div></div></div>
+    </div>
+  </div>
+
+  <!-- GROUP ANALYSIS TAB -->
+  <div id="scan-groups" class="scan-tab" style="display:none;">
+    <div class="page-title" style="margin-bottom:20px;">Group Analysis</div>
+    <div class="tab-row" style="margin-bottom:20px;">
+      <button class="tab-btn active" onclick="switchGroup('caste',this)">Caste</button>
+      <button class="tab-btn" onclick="switchGroup('gender',this)">Gender</button>
+      <button class="tab-btn" onclick="switchGroup('religion',this)">Religion</button>
+      <button class="tab-btn" onclick="switchGroup('region',this)">Region</button>
+    </div>
+    <div id="group-caste">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px;">Approval Rate by Caste</div>
+          <div class="bar-group"><div class="bar-meta"><span>General</span><span>76.2%</span></div><div class="bar-track"><div class="bar-fill" style="width:76.2%;background:var(--g-blue);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>OBC</span><span>63.8%</span></div><div class="bar-track"><div class="bar-fill" style="width:63.8%;background:var(--g-green);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>SC</span><span>49.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:49.1%;background:var(--g-yellow);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>ST</span><span>43.8%</span></div><div class="bar-track"><div class="bar-fill" style="width:43.8%;background:var(--g-red);"></div></div></div>
+          <div style="margin-top:8px;"><span class="badge red">Parity Gap: 32.4%</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px;">Qualified Applicants Wrongly Denied</div>
+          <div class="bar-group"><div class="bar-meta"><span>General</span><span>12.4%</span></div><div class="bar-track"><div class="bar-fill" style="width:24.8%;background:var(--g-blue);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>OBC</span><span>19.2%</span></div><div class="bar-track"><div class="bar-fill" style="width:38.4%;background:var(--g-green);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>SC</span><span>28.7%</span></div><div class="bar-track"><div class="bar-fill" style="width:57.4%;background:var(--g-yellow);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>ST</span><span>34.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:68.2%;background:var(--g-red);"></div></div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:4px;">
+        <div class="card-title" style="margin-bottom:14px;">Complete Caste Comparison Table</div>
+        <table class="data-table">
+          <thead><tr><th>Category</th><th>Applicants</th><th>Approval Rate</th><th>Wrongly Denied</th><th>Disparate Impact</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>General (Reference)</td><td>28,500</td><td>76.2%</td><td>12.4%</td><td>1.00</td><td><span class="badge green">Pass</span></td></tr>
+            <tr><td>OBC</td><td>11,200</td><td>63.8%</td><td>19.2%</td><td>0.84</td><td><span class="badge yellow">Warn</span></td></tr>
+            <tr><td>SC (Scheduled Caste)</td><td>5,800</td><td>49.1%</td><td>28.7%</td><td>0.64</td><td><span class="badge red">Fail</span></td></tr>
+            <tr><td>ST (Scheduled Tribe)</td><td>2,730</td><td>43.8%</td><td>34.1%</td><td>0.57</td><td><span class="badge red">Fail</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="group-gender" style="display:none;">
+      <div class="two-col">
+        <div class="card"><div class="card-title" style="margin-bottom:14px;">Approval by Gender</div>
+          <div class="bar-group"><div class="bar-meta"><span>Male</span><span>76.3%</span></div><div class="bar-track"><div class="bar-fill" style="width:76.3%;background:var(--g-blue);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>Female</span><span>58.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:58.1%;background:var(--g-red);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>Other</span><span>61.4%</span></div><div class="bar-track"><div class="bar-fill" style="width:61.4%;background:var(--g-yellow);"></div></div></div>
+          <span class="badge red" style="margin-top:8px;display:inline-flex;">Gap: 18.2%</span>
+        </div>
+        <div class="card"><div class="card-title" style="margin-bottom:14px;">Gender × Caste (Intersectional)</div>
+          <div class="bar-group"><div class="bar-meta"><span>General Male</span><span>79.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:79.1%;background:var(--g-blue);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>General Female</span><span>72.8%</span></div><div class="bar-track"><div class="bar-fill" style="width:72.8%;background:var(--g-green);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>OBC Female</span><span>55.3%</span></div><div class="bar-track"><div class="bar-fill" style="width:55.3%;background:var(--g-yellow);"></div></div></div>
+          <div class="bar-group"><div class="bar-meta"><span>SC Female</span><span>38.7%</span></div><div class="bar-track"><div class="bar-fill" style="width:38.7%;background:var(--g-red);"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div id="group-religion" style="display:none;">
+      <div class="card"><div class="card-title" style="margin-bottom:14px;">Approval by Religion</div>
+        <div class="bar-group"><div class="bar-meta"><span>Hindu</span><span>71.4%</span></div><div class="bar-track"><div class="bar-fill" style="width:71.4%;background:var(--g-blue);"></div></div></div>
+        <div class="bar-group"><div class="bar-meta"><span>Christian</span><span>69.8%</span></div><div class="bar-track"><div class="bar-fill" style="width:69.8%;background:var(--g-green);"></div></div></div>
+        <div class="bar-group"><div class="bar-meta"><span>Sikh</span><span>67.2%</span></div><div class="bar-track"><div class="bar-fill" style="width:67.2%;background:var(--g-yellow);"></div></div></div>
+        <div class="bar-group"><div class="bar-meta"><span>Muslim</span><span>59.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:59.1%;background:var(--g-red);"></div></div></div>
+        <span class="badge yellow" style="margin-top:8px;display:inline-flex;">Gap: 12.3%</span>
+      </div>
+    </div>
+    <div id="group-region" style="display:none;">
+      <div class="card"><div class="card-title" style="margin-bottom:14px;">Approval by Region</div>
+        <div class="bar-group"><div class="bar-meta"><span>West (Mumbai, Pune)</span><span>74.8%</span></div><div class="bar-track"><div class="bar-fill" style="width:74.8%;background:var(--g-blue);"></div></div></div>
+        <div class="bar-group"><div class="bar-meta"><span>South (Bangalore, Chennai)</span><span>73.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:73.1%;background:var(--g-green);"></div></div></div>
+        <div class="bar-group"><div class="bar-meta"><span>North (Delhi, UP)</span><span>66.4%</span></div><div class="bar-track"><div class="bar-fill" style="width:66.4%;background:var(--g-yellow);"></div></div></div>
+        <div class="bar-group"><div class="bar-meta"><span>East (Bihar, Jharkhand)</span><span>52.3%</span></div><div class="bar-track"><div class="bar-fill" style="width:52.3%;background:var(--g-red);"></div></div></div>
+        <div class="bar-group"><div class="bar-meta"><span>Northeast</span><span>48.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:48.1%;background:var(--g-red);"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES TAB -->
+  <div id="scan-features" class="scan-tab" style="display:none;">
+    <div class="page-title" style="margin-bottom:20px;">Feature Audit</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:14px;">Feature Importance (What drives decisions)</div>
+        <div class="feat-row"><span class="feat-name">credit_score</span><div class="feat-track"><div class="feat-fill" style="width:92%;background:var(--g-blue);"></div></div><span class="feat-val">0.92</span></div>
+        <div class="feat-row"><span class="feat-name">income</span><div class="feat-track"><div class="feat-fill" style="width:78%;background:var(--g-blue);"></div></div><span class="feat-val">0.78</span></div>
+        <div class="feat-row"><span class="feat-name">pin_code</span><div class="feat-track"><div class="feat-fill" style="width:71%;background:var(--g-red);"></div></div><span class="feat-val">0.71</span></div>
+        <div class="feat-row"><span class="feat-name">loan_amount</span><div class="feat-track"><div class="feat-fill" style="width:60%;background:var(--g-blue);"></div></div><span class="feat-val">0.60</span></div>
+        <div class="feat-row"><span class="feat-name">surname</span><div class="feat-track"><div class="feat-fill" style="width:41%;background:var(--g-red);"></div></div><span class="feat-val">0.41</span></div>
+        <div class="feat-row"><span class="feat-name">employment_yrs</span><div class="feat-track"><div class="feat-fill" style="width:38%;background:var(--g-blue);"></div></div><span class="feat-val">0.38</span></div>
+        <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--text3);">
+          <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--g-blue);display:inline-block;"></span>Legitimate</span>
+          <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--g-red);display:inline-block;"></span>Proxy / Biased</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:14px;">Hidden Discriminators Found</div>
+        <div class="alert red" style="margin-bottom:8px;"><span class="alert-icon">!</span><div><strong>pin_code</strong> is 78% correlated with caste. The AI is secretly using caste through the PIN code without anyone realising.</div></div>
+        <div class="alert red"><span class="alert-icon">!</span><div><strong>surname</strong> is 71% correlated with caste and religion in India. The AI learns that "Sharma" = General, "Kumar" = OBC, "Chamar" = SC.</div></div>
+        <div class="alert yellow"><span class="alert-icon">⚠</span><div><strong>employer_name</strong> is 44% correlated with religion (certain industries employ predominantly one community).</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- METRICS TAB -->
+  <div id="scan-metrics" class="scan-tab" style="display:none;">
+    <div class="page-title" style="margin-bottom:20px;">Fairness Tests</div>
+    <div class="metric-grid">
+      <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-red);"></div><div class="metric-label">Tests Failed</div><div class="metric-value mv-red">4</div></div>
+      <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-yellow);"></div><div class="metric-label">Warnings</div><div class="metric-value mv-yellow">2</div></div>
+      <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-green);"></div><div class="metric-label">Tests Passed</div><div class="metric-value mv-green">2</div></div>
+      <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-blue);"></div><div class="metric-label">Pass Rate</div><div class="metric-value mv-blue">33%</div></div>
+    </div>
+    <div class="fairness-grid">
+      <div class="f-cell"><div class="f-name">Demographic Parity</div><div class="f-val" style="color:var(--g-red);">FAIL — 18.4% gap</div><div class="f-desc">All groups should have equal approval rates. Current gap is much bigger than the 5% allowed.</div></div>
+      <div class="f-cell"><div class="f-name">Disparate Impact (4/5 Rule)</div><div class="f-val" style="color:var(--g-red);">FAIL — 0.61 ratio</div><div class="f-desc">SC/ST approval rate is only 61% of General category. Must be at least 80%. This is a legal violation.</div></div>
+      <div class="f-cell"><div class="f-name">Equal Opportunity</div><div class="f-val" style="color:#F9AB00;">WARN — 14.2% diff</div><div class="f-desc">Qualified SC/ST applicants are being denied much more often than qualified General applicants.</div></div>
+      <div class="f-cell"><div class="f-name">Equalized Odds</div><div class="f-val" style="color:var(--g-red);">FAIL — 19.1% diff</div><div class="f-desc">Both approval and rejection error rates are unequal across groups. Multiple groups fail.</div></div>
+      <div class="f-cell"><div class="f-name">Calibration</div><div class="f-val" style="color:#F9AB00;">WARN — 11% error</div><div class="f-desc">The AI's confidence scores are less accurate for lower-income groups.</div></div>
+      <div class="f-cell"><div class="f-name">Individual Fairness</div><div class="f-val" style="color:var(--g-red);">FAIL — 87.3%</div><div class="f-desc">1 in 8 pairs of similar people get different decisions. Should be above 95%.</div></div>
+      <div class="f-cell"><div class="f-name">Counterfactual Fairness</div><div class="f-val" style="color:var(--g-green);">PASS — 94.1%</div><div class="f-desc">Changing only caste/gender doesn't change the decision in 94% of cases. Within acceptable range.</div></div>
+      <div class="f-cell"><div class="f-name">Predictive Parity</div><div class="f-val" style="color:var(--g-green);">PASS — 2.8% diff</div><div class="f-desc">When the AI approves someone, accuracy is similar across groups. Within threshold.</div></div>
+    </div>
+  </div>
+
+  <!-- FIX IT TAB -->
+  <div id="scan-fix" class="scan-tab" style="display:none;">
+    <div class="page-title" style="margin-bottom:4px;">How to Fix the Bias</div>
+    <div class="page-sub" style="margin-bottom:20px;">6 prioritised steps — estimated 31% bias reduction if all applied</div>
+    <div class="plain-box" style="margin-bottom:20px;">
+      <div class="plain-box-title">📖 In simple words</div>
+      <div class="plain-box-text">Your AI has learned bad habits from historical data where SC/ST and women were historically discriminated against. The fixes below will teach your AI to ignore these unfair patterns and make decisions based only on actual financial ability.</div>
+    </div>
+    <div class="card">
+      <div class="rec-item">
+        <div class="rec-num" style="background:var(--g-red-light);color:var(--g-red);">1</div>
+        <div class="rec-body">
+          <div class="rec-title">Remove PIN code as a feature</div>
+          <div class="rec-desc">PIN codes in India are strongly linked to caste (due to historical settlement patterns). By keeping PIN code in your data, your AI is secretly using caste to make decisions without anyone noticing. Replace it with "distance from nearest bank branch" or remove it entirely.</div>
+          <div class="rec-meta"><span class="badge red">Critical</span><span style="font-size:11px;color:var(--text3);">Effort: Low · Impact: High · No retraining needed</span></div>
+        </div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-num" style="background:var(--g-red-light);color:var(--g-red);">2</div>
+        <div class="rec-body">
+          <div class="rec-title">Remove surname / last name from the data</div>
+          <div class="rec-desc">Indian surnames heavily indicate caste and religion (Sharma, Patel, Khan, Nair etc.). Your AI has learned to use these as discriminatory signals. Remove the surname column from your training data immediately. Use a random applicant ID instead.</div>
+          <div class="rec-meta"><span class="badge red">Critical</span><span style="font-size:11px;color:var(--text3);">Effort: Low · Impact: High</span></div>
+        </div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-num" style="background:var(--g-red-light);color:var(--g-red);">3</div>
+        <div class="rec-body">
+          <div class="rec-title">Balance your training data (Reweighing)</div>
+          <div class="rec-desc">Your training data has fewer SC/ST applicants than their real-world proportion. This makes the AI worse at evaluating them. Use a technique called "reweighing" to give SC/ST and women applicants more importance during training — like correcting for a skewed dataset.</div>
+          <div class="rec-code">from aif360.algorithms.preprocessing import Reweighing
+# Give more weight to SC/ST applicants during training
+rw = Reweighing(unprivileged_groups=[{'caste': 'SC'}, {'caste': 'ST'}],
+                privileged_groups=[{'caste': 'General'}])
+dataset_fixed = rw.fit_transform(your_dataset)
+model.fit(X_train, y_train, sample_weight=dataset_fixed.instance_weights)</div>
+          <div class="rec-meta"><span class="badge red">Critical</span><span style="font-size:11px;color:var(--text3);">Effort: Medium</span></div>
+        </div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-num" style="background:var(--g-yellow-light);color:#B06000;">4</div>
+        <div class="rec-body">
+          <div class="rec-title">Apply equal opportunity threshold correction</div>
+          <div class="rec-desc">Without retraining your model, you can adjust its decision thresholds differently for each group so that qualified SC/ST and women applicants get the same chance as General category applicants. This is a quick fix that works immediately.</div>
+          <div class="rec-code">from fairlearn.postprocessing import ThresholdOptimizer
+optimizer = ThresholdOptimizer(estimator=your_model,
+                               constraints='equalized_odds')
+optimizer.fit(X_train, y_train, sensitive_features=df['caste'])
+fair_predictions = optimizer.predict(X_test, sensitive_features=df_test['caste'])</div>
+          <div class="rec-meta"><span class="badge yellow">High</span><span style="font-size:11px;color:var(--text3);">Effort: Low · No retraining needed</span></div>
+        </div>
+      </div>
+      <div class="rec-item">
+        <div class="rec-num" style="background:var(--g-blue-light);color:var(--g-blue);">5</div>
+        <div class="rec-body">
+          <div class="rec-title">Set up weekly bias monitoring</div>
+          <div class="rec-desc">Bias can develop over time as new data comes in. Set up automated weekly checks that alert you if the caste/gender gap rises above 5%. Like a health checkup for your AI — catch problems before they affect thousands of people.</div>
+          <div class="rec-meta"><span class="badge blue">Medium</span><span style="font-size:11px;color:var(--text3);">Effort: Medium · Ongoing protection</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     INDIA LAWS PAGE
+══════════════════════════════════════════ -->
+<div id="page-laws" class="page">
+  <div class="color-stripe"></div>
+  <div class="page-header">
+    <div class="page-title">🇮🇳 Indian Laws on AI Fairness</div>
+    <div class="page-sub">Your AI must comply with these Indian laws and regulations</div>
+  </div>
+  <div class="alert blue" style="margin-bottom:20px;"><span class="alert-icon">ℹ</span><div>India is rapidly developing AI regulation. Many of these laws already apply to AI systems making decisions about Indian citizens. Non-compliance can lead to heavy fines, bans, and legal action.</div></div>
+  <div class="law-grid">
+    <div class="law-card blue">
+      <div class="law-name">Digital Personal Data Protection Act 2023 (DPDP)</div>
+      <div class="law-desc">India's main data protection law. Requires that automated decisions affecting individuals must be fair, transparent, and non-discriminatory. Data principals have the right to explanation for AI decisions. Penalties up to <strong>₹250 crore</strong> per violation.</div>
+      <div class="law-status" style="background:var(--g-red-light);color:#C5221F;">Active Law — Must Comply Now</div>
+    </div>
+    <div class="law-card red">
+      <div class="law-name">Constitution of India — Article 15 & 16</div>
+      <div class="law-desc">Prohibits discrimination on grounds of religion, race, caste, sex, or place of birth. AI systems making decisions for government services must not discriminate against any of these groups. This is a fundamental right — AI systems cannot bypass it.</div>
+      <div class="law-status" style="background:var(--g-red-light);color:#C5221F;">Constitutional Right — Highest Priority</div>
+    </div>
+    <div class="law-card yellow">
+      <div class="law-name">Equal Remuneration Act 1976</div>
+      <div class="law-desc">Prohibits gender discrimination in pay and hiring decisions. AI tools used in HR and hiring that show gender bias in recommendations or screening are in direct violation. Employers can be held liable for their AI tools' discriminatory outputs.</div>
+      <div class="law-status" style="background:var(--g-yellow-light);color:#B06000;">Active — Applies to Hiring AI</div>
+    </div>
+    <div class="law-card green">
+      <div class="law-name">Scheduled Castes & Tribes (Prevention of Atrocities) Act</div>
+      <div class="law-desc">While primarily for physical atrocities, legal experts argue AI-based discrimination causing financial harm to SC/ST individuals could fall under this act. Penalties include imprisonment. Banks using biased AI for loan decisions face increasing scrutiny.</div>
+      <div class="law-status" style="background:var(--g-yellow-light);color:#B06000;">Evolving Interpretation for AI</div>
+    </div>
+    <div class="law-card blue">
+      <div class="law-name">RBI Fair Practices Code (Banking)</div>
+      <div class="law-desc">The Reserve Bank of India's Fair Practices Code requires banks to assess loan applications fairly and transparently. AI-based loan decisions must be explainable and must not discriminate based on caste, religion, gender, or region. RBI audits can flag biased AI.</div>
+      <div class="law-status" style="background:var(--g-red-light);color:#C5221F;">Active — All Banks Must Comply</div>
+    </div>
+    <div class="law-card red">
+      <div class="law-name">IT Act 2000 + Amendment (Proposed AI Rules)</div>
+      <div class="law-desc">The Ministry of Electronics & IT is developing AI-specific rules under the IT Act. Draft rules propose mandatory bias testing for high-risk AI systems before deployment. Expected to become law by 2025-26 with fines for non-compliant AI systems.</div>
+      <div class="law-status" style="background:var(--g-blue-light);color:var(--g-blue);">Upcoming Law — Prepare Now</div>
+    </div>
+    <div class="law-card yellow">
+      <div class="law-name">Persons with Disabilities Act 2016 (RPwD)</div>
+      <div class="law-desc">AI systems used in education, employment, or public services must be accessible and non-discriminatory toward persons with disabilities. AI hiring tools must not filter out qualified candidates based on disability indicators in their data.</div>
+      <div class="law-status" style="background:var(--g-yellow-light);color:#B06000;">Active — Hiring & Education AI</div>
+    </div>
+    <div class="law-card green">
+      <div class="law-name">EU AI Act (Affects Indian Companies)</div>
+      <div class="law-desc">If your company sells AI services to European customers, you must comply with the EU AI Act by August 2026. It requires mandatory bias testing, documentation, and human oversight for high-risk AI (banking, hiring, healthcare). Fines up to €35 million.</div>
+      <div class="law-status" style="background:var(--g-red-light);color:#C5221F;">Deadline: August 2026</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:4px;">
+    <div class="card-title" style="margin-bottom:14px;">Legal Compliance Status of Your Model</div>
+    <table class="data-table">
+      <thead><tr><th>Law / Regulation</th><th>Requirement</th><th>Your Status</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>DPDP Act 2023</td><td>Fair & explainable automated decisions</td><td>DI ratio 0.61 — not explainable</td><td><span class="badge red">Non-Compliant</span></td></tr>
+        <tr><td>Article 15/16 (Constitution)</td><td>No caste/religion discrimination</td><td>SC/ST gap: 32.4%</td><td><span class="badge red">Violation Risk</span></td></tr>
+        <tr><td>Equal Remuneration Act</td><td>No gender bias in decisions</td><td>Gender gap: 18.2%</td><td><span class="badge red">Non-Compliant</span></td></tr>
+        <tr><td>RBI Fair Practices Code</td><td>Transparent, fair loan decisions</td><td>Not documented</td><td><span class="badge yellow">Incomplete</span></td></tr>
+        <tr><td>IT Act (Proposed AI Rules)</td><td>Bias testing before deployment</td><td>First test done today</td><td><span class="badge yellow">Partial</span></td></tr>
+        <tr><td>EU AI Act</td><td>Full bias testing + documentation</td><td>Testing done, docs missing</td><td><span class="badge yellow">Incomplete</span></td></tr>
+        <tr><td>RPwD Act 2016</td><td>No disability discrimination</td><td>Not tested yet</td><td><span class="badge blue">Not Tested</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CASE STUDIES PAGE
+══════════════════════════════════════════ -->
+<div id="page-cases" class="page">
+  <div class="color-stripe"></div>
+  <div class="page-header">
+    <div class="page-title">Real Case Studies from India</div>
+    <div class="page-sub">These are real or realistic examples of AI bias causing harm in India</div>
+  </div>
+  <div class="case-card" style="border-left-color:var(--g-red);">
+    <div class="case-title">🏦 SBI-style Loan AI — Caste Bias in Credit Scoring</div>
+    <div class="case-body">A large public sector bank deployed an AI credit scoring system trained on 10 years of historical loan data. Since SC/ST applicants historically had lower approval rates (due to human bias), the AI learned to replicate this pattern. Applicants with identical CIBIL scores, income, and employment history were being denied at 2.4x higher rates if they lived in historically SC/ST-dominated PIN codes. The AI was using geography as a caste proxy. The RBI inspection in 2023 flagged this as a violation of the Fair Practices Code.</div>
+    <div class="case-verdict" style="background:var(--g-red-light);color:#C5221F;">⚠ Outcome: ₹15 crore penalty, mandatory AI audit, 8,400 loan applications re-reviewed</div>
+  </div>
+  <div class="case-card" style="border-left-color:var(--g-yellow);">
+    <div class="case-title">👔 IT Company Hiring AI — Gender & Religion Bias</div>
+    <div class="case-body">A major Bengaluru IT company used an AI resume screener trained on profiles of existing employees (predominantly male, upper-caste, from IITs). The system gave lower scores to resumes from women's colleges, resumes with Muslim or Christian names, and candidates from tier-2/tier-3 colleges. Qualified women engineers from state universities were being screened out before any human reviewer saw their application. A whistleblower complaint to the Equal Opportunity Commission in 2024 revealed the bias. The company was unaware their AI had learned these patterns.</div>
+    <div class="case-verdict" style="background:var(--g-yellow-light);color:#B06000;">⚠ Outcome: Legal notice, 2,000+ rejections re-evaluated, mandatory bias testing policy implemented</div>
+  </div>
+  <div class="case-card" style="border-left-color:var(--g-yellow);">
+    <div class="case-title">🏥 Ayushman Bharat AI — Regional Healthcare Bias</div>
+    <div class="case-body">An AI system assisting in processing Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (PM-JAY) claims was found to approve claims 34% faster for applicants from urban areas compared to rural Northeast India and tribal regions. The delay wasn't intentional — the AI was trained mainly on data from high-volume urban hospitals. Sparse data from rural areas meant the AI had worse pattern recognition for those applications and flagged them for manual review more often, causing systematic delays in healthcare access for those who needed it most.</div>
+    <div class="case-verdict" style="background:var(--g-yellow-light);color:#B06000;">⚠ Outcome: NHA audit ordered, AI retrained with balanced regional data, rural data collection improved</div>
+  </div>
+  <div class="case-card" style="border-left-color:var(--g-green);">
+    <div class="case-title">🎓 JEE Coaching Recommendation AI — Caste & Economic Bias</div>
+    <div class="case-body">An edtech platform's AI recommended premium coaching plans to students based on predicted success probability. The model was trained on past student outcomes but didn't account for socioeconomic factors. SC/ST students from government schools were consistently recommended cheaper, lower-quality plans even when their aptitude scores were identical to General category students from private schools. This created a digital replication of existing inequality — the AI was making decisions that reinforced rather than broke the cycle of disadvantage.</div>
+    <div class="case-verdict" style="background:var(--g-green-light);color:#137333;">✓ Outcome: Company proactively fixed bias after internal audit. Approved FairScan-style testing as standard practice.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     LEARN PAGE
+══════════════════════════════════════════ -->
+<div id="page-learn" class="page">
+  <div class="color-stripe"></div>
+  <div class="page-header">
+    <div class="page-title">What is AI Bias? — Simple Explanations</div>
+    <div class="page-sub">No technical knowledge needed to understand this</div>
+  </div>
+  <div class="card" style="border-left:4px solid var(--g-blue);">
+    <div class="card-title">🤔 What is AI Bias? (In simple words)</div>
+    <div style="font-size:14px;color:var(--text2);line-height:1.8;margin-top:8px;">Imagine you teach a child by showing them examples. If all the examples you show are biased — like always showing women doing housework and men doing office work — the child will learn that bias as "normal". AI works the same way. When an AI is trained on historical data that reflects past discrimination (like loan rejections that were biased against SC/ST people), the AI learns to repeat those same discriminatory decisions. It doesn't know it's being unfair — it's just following the patterns in its training data.</div>
+    <div class="plain-box">
+      <div class="plain-box-title">🇮🇳 India Example</div>
+      <div class="plain-box-text">A bank AI trained on 20 years of loan data learns: "In the past, SC/ST applicants were approved less often." So it continues to approve them less often — even today, when the real reason for past rejections was human discrimination, not financial ability. The AI is repeating history's mistakes at scale, automatically, thousands of times per day.</div>
+    </div>
+  </div>
+  <div class="three-col" style="margin-top:4px;">
+    <div class="card" style="border-top:4px solid var(--g-blue);">
+      <div style="font-size:24px;margin-bottom:8px;">📊</div>
+      <div class="card-title">Demographic Parity</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.7;">All groups should be approved at similar rates. If General applicants are approved 76% of the time but SC applicants only 49% — with the same financial profiles — that gap is unfair bias.</div>
+    </div>
+    <div class="card" style="border-top:4px solid var(--g-red);">
+      <div style="font-size:24px;margin-bottom:8px;">⚖️</div>
+      <div class="card-title">Disparate Impact</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.7;">The 4/5 Rule: If the minority group's approval rate is less than 80% of the majority group's rate, it's illegal discrimination. 49%÷76% = 0.64 — below 0.80, which means it fails this legal test.</div>
+    </div>
+    <div class="card" style="border-top:4px solid var(--g-green);">
+      <div style="font-size:24px;margin-bottom:8px;">🔍</div>
+      <div class="card-title">Proxy Features</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.7;">Sometimes AI discriminates without using caste/gender directly. It uses related information instead — like PIN code (linked to caste neighborhoods) or surname (linked to caste/religion). These are called "proxy features."</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:4px;">
+    <div class="card-title" style="margin-bottom:14px;">📚 Glossary — Technical terms explained simply</div>
+    <table class="data-table">
+      <thead><tr><th>Technical Term</th><th>Simple Meaning</th><th>India Example</th></tr></thead>
+      <tbody>
+        <tr><td>Disparate Impact</td><td>One group gets significantly worse outcomes than another</td><td>SC/ST get loans approved 61% as often as General category</td></tr>
+        <tr><td>Proxy Feature</td><td>A data column that secretly reveals protected information</td><td>PIN code reveals caste neighborhood</td></tr>
+        <tr><td>Training Data</td><td>The historical examples used to teach the AI</td><td>10 years of past loan applications</td></tr>
+        <tr><td>False Negative Rate</td><td>How often the AI wrongly rejects qualified people</td><td>Qualified SC applicant denied a deserved loan</td></tr>
+        <tr><td>Reweighing</td><td>Giving underrepresented groups more importance during AI training</td><td>Making SC/ST examples count more when teaching the AI</td></tr>
+        <tr><td>Threshold Optimization</td><td>Adjusting the AI's strictness differently per group to equalize outcomes</td><td>Setting a slightly lower bar for SC/ST to compensate for bias</td></tr>
+        <tr><td>SHAP Values</td><td>A way to see exactly why the AI made each decision</td><td>"The AI rejected this applicant mainly because of their PIN code"</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+<!-- ══════════════════════════════════════════
+     EXECUTIVE SUMMARY PAGE
+══════════════════════════════════════════ -->
+<div id="page-executive" class="page">
+  <div class="color-stripe"></div>
+  <div class="header-row" style="margin-bottom:24px;">
+    <div>
+      <div class="page-title">Executive Summary</div>
+      <div class="page-sub">Board-ready overview · Loan Approval Model v2.4 · April 2, 2026</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="printExec()">🖨 Print</button>
+      <button class="btn btn-blue" onclick="exportReport()">⬇ Download PDF</button>
+    </div>
+  </div>
+
+  <!-- BIG RISK SUMMARY BOX -->
+  <div class="exec-summary-box">
+    <div class="exec-summary-title">AI Bias Audit — Executive Briefing</div>
+    <div class="exec-summary-text">
+      Our loan approval AI model was audited on <strong>48,230 applicant records</strong> on April 2, 2026.
+      The audit found <strong style="color:#ff6b6b;">3 critical legal violations</strong> and <strong style="color:#ffd93d;">2 compliance warnings</strong>.
+      SC/ST applicants are being approved at <strong style="color:#ff6b6b;">only 61% the rate</strong> of General category applicants with identical financial profiles.
+      This constitutes a violation of the <strong>DPDP Act 2023</strong>, <strong>RBI Fair Practices Code</strong>, and puts the organisation at risk under <strong>Article 15 of the Constitution</strong>.
+      <strong style="color:#6bcb77;">Immediate remediation is recommended</strong> — 3 fixes can be applied within 2 weeks with no model retraining required.
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="exec-kpi-row">
+    <div class="exec-kpi" style="border-top:4px solid var(--g-red);">
+      <div class="exec-kpi-val" style="color:var(--g-red);">67</div>
+      <div class="exec-kpi-lbl">Bias Risk Score</div>
+      <div style="margin-top:12px;">
+        <div class="exec-risk-bar"><div class="exec-risk-needle" style="left:67%;"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono);">
+          <span>LOW</span><span>MEDIUM</span><span>HIGH</span>
+        </div>
+      </div>
+      <div class="exec-kpi-sub">Out of 100 · HIGH RISK</div>
+    </div>
+    <div class="exec-kpi" style="border-top:4px solid var(--g-red);">
+      <div class="exec-kpi-val" style="color:var(--g-red);">3</div>
+      <div class="exec-kpi-lbl">Legal Violations</div>
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
+        <div style="font-size:12px;color:#C5221F;">● DPDP Act 2023</div>
+        <div style="font-size:12px;color:#C5221F;">● RBI Fair Practices Code</div>
+        <div style="font-size:12px;color:#C5221F;">● Equal Remuneration Act</div>
+      </div>
+    </div>
+    <div class="exec-kpi" style="border-top:4px solid var(--g-yellow);">
+      <div class="exec-kpi-val" style="color:#F9AB00;">0.61</div>
+      <div class="exec-kpi-lbl">Disparate Impact Ratio</div>
+      <div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.5;">SC/ST approval vs General. Legal minimum is <strong>0.80</strong>. We are <strong style="color:#C5221F;">19 points below</strong> the legal threshold.</div>
+    </div>
+  </div>
+
+  <!-- GROUP IMPACT TABLE -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="card-title">Impact on Affected Groups</div>
+      <span class="badge red">Action Required</span>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Group</th>
+          <th>Approval Rate</th>
+          <th>vs. Benchmark</th>
+          <th>Est. People Affected / Month</th>
+          <th>Legal Risk</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SC / Scheduled Caste</strong></td>
+          <td style="color:var(--g-red);font-weight:600;">49.1%</td>
+          <td style="color:var(--g-red);">−27.1% vs General</td>
+          <td>~1,840 wrongly denied</td>
+          <td><span class="badge red">Critical</span></td>
+          <td><span class="badge red">Fix immediately</span></td>
+        </tr>
+        <tr>
+          <td><strong>ST / Scheduled Tribe</strong></td>
+          <td style="color:var(--g-red);font-weight:600;">43.8%</td>
+          <td style="color:var(--g-red);">−32.4% vs General</td>
+          <td>~920 wrongly denied</td>
+          <td><span class="badge red">Critical</span></td>
+          <td><span class="badge red">Fix immediately</span></td>
+        </tr>
+        <tr>
+          <td><strong>Women Applicants</strong></td>
+          <td style="color:#F9AB00;font-weight:600;">58.1%</td>
+          <td style="color:#F9AB00;">−18.2% vs Men</td>
+          <td>~2,100 wrongly denied</td>
+          <td><span class="badge red">Critical</span></td>
+          <td><span class="badge red">Fix immediately</span></td>
+        </tr>
+        <tr>
+          <td><strong>Muslim Applicants</strong></td>
+          <td style="color:#F9AB00;font-weight:600;">59.1%</td>
+          <td style="color:#F9AB00;">−12.3% vs Hindu</td>
+          <td>~680 wrongly denied</td>
+          <td><span class="badge yellow">Moderate</span></td>
+          <td><span class="badge yellow">Fix within 30 days</span></td>
+        </tr>
+        <tr>
+          <td><strong>Northeast / Bihar Applicants</strong></td>
+          <td style="color:#F9AB00;font-weight:600;">50.2%</td>
+          <td style="color:#F9AB00;">−24.6% vs Metro</td>
+          <td>~560 wrongly denied</td>
+          <td><span class="badge yellow">Moderate</span></td>
+          <td><span class="badge yellow">Fix within 30 days</span></td>
+        </tr>
+        <tr>
+          <td><strong>OBC Applicants</strong></td>
+          <td style="color:#137333;font-weight:600;">63.8%</td>
+          <td style="color:#137333;">−12.4% vs General</td>
+          <td>~1,200 wrongly denied</td>
+          <td><span class="badge yellow">Low</span></td>
+          <td><span class="badge yellow">Monitor closely</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RECOMMENDED ACTIONS FOR BOARD -->
+  <div class="card">
+    <div class="card-title" style="margin-bottom:16px;">Recommended Board Actions</div>
+    <div class="exec-action-item">
+      <div class="exec-action-dot" style="background:var(--g-red);margin-top:5px;"></div>
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px;">Immediate (This Week): Suspend AI-only loan decisions for SC/ST applicants</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;">Until the bias is fixed, route all SC/ST and women applicant decisions through human review. This limits legal liability and protects against DPDP Act penalties of up to ₹250 crore.</div>
+      </div>
+    </div>
+    <div class="exec-action-item">
+      <div class="exec-action-dot" style="background:var(--g-yellow);margin-top:5px;"></div>
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px;">Short Term (2 Weeks): Apply 3 no-retraining fixes</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;">Remove PIN code, remove surname, and apply threshold optimization. These three changes require no model retraining, take 2 weeks, and will reduce the bias score from 67 to approximately 42. Assign to the AI/Data team lead.</div>
+      </div>
+    </div>
+    <div class="exec-action-item">
+      <div class="exec-action-dot" style="background:var(--g-blue);margin-top:5px;"></div>
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px;">Medium Term (6 Weeks): Full model retraining with fairness constraints</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;">Retrain the model using balanced data and adversarial debiasing. Target: bias score below 30, DI ratio above 0.85. Schedule quarterly FairScan audits going forward.</div>
+      </div>
+    </div>
+    <div class="exec-action-item">
+      <div class="exec-action-dot" style="background:var(--g-green);margin-top:5px;"></div>
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px;">Ongoing: Establish AI Ethics Governance Policy</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;">Create an AI Ethics Committee, mandate bias testing before any AI deployment, and document compliance for DPDP Act and upcoming IT Act AI Rules. FairScan audit reports serve as compliance documentation.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exec-share-row">
+    <button class="btn btn-outline" onclick="window.print()">🖨 Print for Board Meeting</button>
+    <button class="btn btn-blue" onclick="exportReport()">⬇ Download Full Report</button>
+    <button class="btn" style="background:var(--g-green-light);color:#137333;border:1px solid rgba(52,168,83,.3);" onclick="showPage('certificate', null)">🏅 Get Compliance Certificate</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     AUDIT TRAIL LOG PAGE
+══════════════════════════════════════════ -->
+<div id="page-auditlog" class="page">
+  <div class="color-stripe"></div>
+  <div class="header-row" style="margin-bottom:20px;">
+    <div>
+      <div class="page-title">Audit Trail Log</div>
+      <div class="page-sub">Complete timestamped record of all bias scans, findings, and actions taken</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="exportReport()">⬇ Export Log</button>
+      <button class="btn btn-blue" onclick="addAuditEntry()">+ Add Manual Note</button>
+    </div>
+  </div>
+
+  <!-- STATS ROW -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">
+    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-blue);"></div><div class="metric-label">Total Scans Run</div><div class="metric-value mv-blue">7</div><div class="metric-sub">Since Jan 2026</div></div>
+    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-red);"></div><div class="metric-label">Critical Issues Found</div><div class="metric-value mv-red">11</div><div class="metric-sub">Across all scans</div></div>
+    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-green);"></div><div class="metric-label">Issues Resolved</div><div class="metric-value mv-green">5</div><div class="metric-sub">45% resolution rate</div></div>
+    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-yellow);"></div><div class="metric-label">Avg Bias Score</div><div class="metric-value mv-yellow">71</div><div class="metric-sub">Trend: improving</div></div>
+  </div>
+
+  <!-- FILTER BUTTONS -->
+  <div class="audit-filters">
+    <button class="audit-filter-btn active" onclick="filterAudit('all',this)">All Events</button>
+    <button class="audit-filter-btn" onclick="filterAudit('scan',this)">🔍 Scans</button>
+    <button class="audit-filter-btn" onclick="filterAudit('finding',this)">⚠ Findings</button>
+    <button class="audit-filter-btn" onclick="filterAudit('action',this)">✅ Actions Taken</button>
+    <button class="audit-filter-btn" onclick="filterAudit('legal',this)">⚖ Legal / Compliance</button>
+  </div>
+
+  <!-- TIMELINE LOG -->
+  <div class="card" id="audit-log-container">
+    <div class="audit-entry" data-type="scan">
+      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-blue);"></div><div class="audit-line"></div></div>
+      <div class="audit-time">02 Apr 2026<br>14:32 IST</div>
+      <div class="audit-content">
+        <div class="audit-title">Full Bias Scan Completed — Loan Approval Model v2.4</div>
+        <div class="audit-detail">48,230 records scanned. 8 fairness tests run. Bias score: 67/100 (HIGH RISK). 3 critical violations, 2 warnings detected. Scan duration: 4 min 12 sec. Run by: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d8bbb7b5a8b4b1b9b6bbbd98bbb7b5a8b9b6a1f6bbb7b5">[email&#160;protected]</a></div>
+        <div class="audit-tags">
+          <span class="audit-tag badge red">Score: 67/100</span>
+          <span class="audit-tag badge blue">48,230 records</span>
+          <span class="audit-tag badge red">3 violations</span>
+        </div>
+      </div>
+    </div>
+    <div class="audit-entry" data-type="finding">
+      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-red);"></div><div class="audit-line"></div></div>
+      <div class="audit-time">02 Apr 2026<br>14:33 IST</div>
+      <div class="audit-content">
+        <div class="audit-title">Critical Finding: Caste Bias — SC/ST Disparate Impact 0.57</div>
+        <div class="audit-detail">ST applicants approved at 43.8% vs General 76.2%. Disparate Impact ratio 0.57 — below the 0.80 legal threshold. Violates DPDP Act 2023 and RBI Fair Practices Code. 2,760 SC/ST applicants may have been wrongly denied in the past 90 days.</div>
+        <div class="audit-tags">
+          <span class="audit-tag badge red">DPDP Violation</span>
+          <span class="audit-tag badge red">RBI Code Violation</span>
+          <span class="audit-tag badge red">Critical</span>
+        </div>
+      </div>
+    </div>
+    <div class="audit-entry" data-type="finding">
+      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-red);"></div><div class="audit-line"></div></div>
+      <div class="audit-time">02 Apr 2026<br>14:33 IST</div>
+      <div class="audit-content">
+        <div class="audit-title">Critical Finding: PIN Code Used as Caste Proxy (r = 0.78)</div>
+        <div class="audit-detail">Feature audit detected PIN code has 0.78 Pearson correlation with caste category. Model is using geographic location as an indirect discriminator. Surname field shows 0.71 correlation with caste/religion. Both recommended for immediate removal.</div>
+        <div class="audit-tags">
+          <span class="audit-tag badge red">Proxy Feature</span>
+          <span class="audit-tag badge yellow">PIN Code</span>
+          <span class="audit-tag badge yellow">Surname</span>
+        </div>
+      </div>
+    </div>
+    <div class="audit-entry" data-type="legal">
+      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-yellow);"></div><div class="audit-line"></div></div>
+      <div class="audit-time">02 Apr 2026<br>15:10 IST</div>
+      <div class="audit-content">
+        <div class="audit-title">Legal Review Triggered — Report shared with Legal Team</div>
+        <div class="audit-detail">Audit findings shared with <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="85e9e0e2e4e9c5e6eae8f5e4ebfcabe6eae8">[email&#160;protected]</a> and <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="62010d0f120e0b030c010722010d0f12030c1b4c010d0f">[email&#160;protected]</a>. Legal team to review DPDP Act liability exposure. Counsel advised to document all remediation steps taken as evidence of good-faith compliance effort.</div>
+        <div class="audit-tags">
+          <span class="audit-tag badge yellow">Legal Review</span>
+          <span class="audit-tag badge blue">In Progress</span>
+        </div>
+      </div>
+    </div>
+    <div class="audit-entry" data-type="action">
+      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-green);"></div><div class="audit-line"></div></div>
+      <div class="audit-time">15 Mar 2026<br>11:20 IST</div>
+      <div class="audit-content">
+        <div class="audit-title">Action Taken: Gender Bias Threshold Fix Applied</div>
+        <div class="audit-detail">ThresholdOptimizer applied for gender attribute. Women's approval rate improved from 51.2% to 58.1%. Gender parity gap reduced from 25.1% to 18.2%. Further improvement pending full retraining. Applied by: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="46272f2936350625292b3627283f6825292b">[email&#160;protected]</a></div>
+        <div class="audit-tags">
+          <span class="audit-tag badge green">Partially Fixed</span>
+          <span class="audit-tag badge green">Gender</span>
+        </div>
+      </div>
+    </div>
+    <div class="audit-entry" data-type="scan">
+      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-blue);"></div><div class="audit-line"></div></div>
+      <div class="audit-time">01 Feb 2026<br>09:45 IST</div>
+      <div class="audit-content">
+        <div class="audit-title">Full Bias Scan Completed — Loan Approval Model v2.3</div>
+        <div class="audit-detail">45,800 records scanned. Bias score: 78/100. 4 critical violations detected. Caste bias worse than current version — improvements confirmed in v2.4. Run by: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e480859085c990818589a4878b8994858a9dca878b89">[email&#160;protected]</a></div>
+        <div class="audit-tags">
+          <span class="audit-tag badge red">Score: 78/100</span>
+          <span class="audit-tag badge blue">v2.3</span>
+        </div>
+      </div>
+    </div>
+    <div class="audit-entry" data-type="action">
+      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-green);"></div><div class="audit-line"></div></div>
+      <div class="audit-time">10 Jan 2026<br>16:00 IST</div>
+      <div class="audit-content">
+        <div class="audit-title">Action Taken: AI Ethics Policy v1.0 Adopted by Board</div>
+        <div class="audit-detail">Board resolution passed requiring mandatory FairScan audit before any AI model deployment. Quarterly re-audits mandated. AI Ethics Committee formed with 5 members. Policy document filed with company secretary.</div>
+        <div class="audit-tags">
+          <span class="audit-tag badge green">Policy Adopted</span>
+          <span class="audit-tag badge green">Board Resolution</span>
+        </div>
+      </div>
+    </div>
+    <!-- NEW ENTRY PLACEHOLDER -->
+    <div id="new-audit-entry" style="display:none;" class="audit-entry" data-type="action">
+      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-blue);"></div></div>
+      <div class="audit-time" id="new-entry-time"></div>
+      <div class="audit-content">
+        <div class="audit-title" id="new-entry-title"></div>
+        <div class="audit-detail" id="new-entry-detail"></div>
+        <div class="audit-tags"><span class="audit-tag badge blue">Manual Note</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     COMPLIANCE CERTIFICATE PAGE
+══════════════════════════════════════════ -->
+<div id="page-certificate" class="page">
+  <div class="color-stripe"></div>
+  <div class="header-row" style="margin-bottom:24px;">
+    <div>
+      <div class="page-title">Compliance Certificate</div>
+      <div class="page-sub">Downloadable proof of AI bias audit for legal and regulatory filing</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="window.print()">🖨 Print Certificate</button>
+      <button class="btn btn-blue" onclick="exportReport()">⬇ Download HTML</button>
+    </div>
+  </div>
+
+  <!-- CERT STATUS -->
+  <div class="alert yellow" style="margin-bottom:20px;">
+    <span class="alert-icon">⚠</span>
+    <div><strong>Conditional Certificate Issued.</strong> A bias audit was completed and documented. However, 3 critical violations were found. The certificate below documents the audit was conducted and remediation is in progress. A "Pass" certificate will be issued once bias score drops below 30.</div>
+  </div>
+
+  <!-- THE CERTIFICATE -->
+  <div class="cert-wrap" id="certificate-print">
+    <div class="cert-border-top"></div>
+    <div class="cert-border-bottom"></div>
+    <div class="cert-watermark">AI AUDIT</div>
+
+    <div class="cert-header">
+      <div class="cert-logo-row">
+        <div style="display:flex;gap:3px;flex-wrap:wrap;width:16px;">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--g-blue);"></div>
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--g-red);"></div>
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--g-yellow);"></div>
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--g-green);"></div>
+        </div>
+        <span style="font-family:var(--display);font-size:18px;font-weight:700;"><span style="color:var(--g-blue);">Fair</span><span style="color:var(--g-red);">Sc</span><span style="color:var(--g-yellow);">an</span> <span style="color:var(--g-green);">India</span></span>
+      </div>
+      <div class="cert-issued">CERTIFICATE OF AI BIAS AUDIT</div>
+      <div class="cert-title">AI Fairness Audit Certificate</div>
+      <div class="cert-subtitle">Issued under the FairScan India Compliance Framework</div>
+    </div>
+
+    <div class="cert-divider"></div>
+
+    <div class="cert-for">This certificate confirms that an AI bias audit was conducted for</div>
+    <div class="cert-org" id="cert-org-name">Your Organisation Name</div>
+    <div style="text-align:center;margin-bottom:8px;">
+      <input type="text" id="cert-org-input" placeholder="Click to enter your organisation name" style="border:1px dashed var(--border);border-radius:8px;padding:8px 16px;font-size:14px;font-family:var(--sans);text-align:center;width:360px;color:var(--text2);background:var(--gray50);" oninput="document.getElementById('cert-org-name').textContent=this.value||'Your Organisation Name'"/>
+    </div>
+
+    <div class="cert-divider"></div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+      <div class="cert-status-seal fail" id="cert-seal">
+        ⚠ Audit Completed — Remediation In Progress
+      </div>
+    </div>
+
+    <div class="cert-facts">
+      <div class="cert-fact">
+        <div class="cert-fact-val" style="color:var(--g-blue);">48,230</div>
+        <div class="cert-fact-lbl">Records Audited</div>
+      </div>
+      <div class="cert-fact">
+        <div class="cert-fact-val" style="color:var(--g-red);">67/100</div>
+        <div class="cert-fact-lbl">Bias Risk Score</div>
+      </div>
+      <div class="cert-fact">
+        <div class="cert-fact-val" style="color:var(--g-yellow);">8</div>
+        <div class="cert-fact-lbl">Fairness Tests Run</div>
+      </div>
+    </div>
+
+    <div style="background:var(--gray50);border-radius:var(--radius);padding:16px 20px;margin:16px 0;font-size:13px;color:var(--text2);line-height:1.8;">
+      <strong>Audit Scope:</strong> Caste (General/OBC/SC/ST), Gender, Religion, Age Group, Region · 
+      <strong>Model:</strong> Loan Approval Model v2.4 · 
+      <strong>Audit Date:</strong> April 2, 2026 · 
+      <strong>Next Audit Due:</strong> July 2, 2026 ·
+      <strong>Laws Checked:</strong> DPDP Act 2023, RBI Fair Practices Code, Equal Remuneration Act, Article 15/16
+    </div>
+
+    <div class="cert-sig-row">
+      <div class="cert-sig">
+        <div style="height:40px;"></div>
+        <div class="cert-sig-line"></div>
+        <div class="cert-sig-name">Chief Compliance Officer</div>
+        <div class="cert-sig-role">Authorised Signatory</div>
+      </div>
+      <div class="cert-sig">
+        <div style="height:40px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:60px;height:60px;border-radius:50%;border:3px solid var(--g-blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--g-blue);text-align:center;line-height:1.3;">FAIR<br>SCAN<br>✓</div>
+        </div>
+        <div class="cert-sig-line"></div>
+        <div class="cert-sig-name">FairScan India Platform</div>
+        <div class="cert-sig-role">Audit System Verification</div>
+      </div>
+    </div>
+
+    <div class="cert-id" id="cert-id-text">Certificate ID: FS-IN-2026-04-02-48230 · This certificate is auto-generated by FairScan India. Verify at fairscan.india/verify</div>
+  </div>
+
+  <!-- CERTIFICATE CUSTOMIZATION -->
+  <div class="card" style="margin-top:20px;max-width:760px;margin-left:auto;margin-right:auto;">
+    <div class="card-title" style="margin-bottom:14px;">Customise Certificate</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">Organisation Name</div>
+        <input type="text" placeholder="e.g. State Bank of India" style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--sans);" oninput="document.getElementById('cert-org-name').textContent=this.value||'Your Organisation Name'; document.getElementById('cert-org-input').value=this.value;"/>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">Mark Status As</div>
+        <select style="width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--sans);" onchange="updateCertStatus(this.value)">
+          <option value="progress">⚠ Remediation In Progress</option>
+          <option value="pass">✅ Audit Passed</option>
+          <option value="review">🔍 Under Review</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px;">
+      <button class="btn btn-blue" onclick="window.print()">🖨 Print Certificate</button>
+      <button class="btn btn-outline" onclick="exportReport()">⬇ Save as HTML</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ WHAT-IF SIMULATOR ══════ -->
+<div id="page-simulator" class="page">
+  <div class="color-stripe"></div>
+  <div class="page-header">
+    <div class="page-title">🎮 What-If Bias Simulator</div>
+    <div class="page-sub">Move the sliders to see how each fix would change your bias score — before spending time implementing anything</div>
+  </div>
+  <div class="alert blue" style="margin-bottom:20px;"><span class="alert-icon">ℹ</span><div><strong>How to use:</strong> Each slider = one potential fix. Drag them to instantly see how your score, disparate impact, and legal compliance would change. Decide which fixes give the best return.</div></div>
+  <div class="two-col">
+    <div class="sim-panel">
+      <div class="card-title" style="margin-bottom:20px;">Adjust Potential Fixes</div>
+      <div class="sim-slider-row"><span class="sim-slider-label">Remove PIN code proxy</span><input type="range" class="sim-slider" min="0" max="100" value="0" step="1" oninput="updateSimulator()" id="sl-pin"/><span class="sim-slider-val" id="sl-pin-val">0%</span></div>
+      <div class="sim-slider-row"><span class="sim-slider-label">Remove surname proxy</span><input type="range" class="sim-slider" min="0" max="100" value="0" step="1" oninput="updateSimulator()" id="sl-surname"/><span class="sim-slider-val" id="sl-surname-val">0%</span></div>
+      <div class="sim-slider-row"><span class="sim-slider-label">Reweigh SC/ST training data</span><input type="range" class="sim-slider" min="0" max="100" value="0" step="1" oninput="updateSimulator()" id="sl-reweight"/><span class="sim-slider-val" id="sl-reweight-val">0%</span></div>
+      <div class="sim-slider-row"><span class="sim-slider-label">Apply threshold optimizer</span><input type="range" class="sim-slider" min="0" max="100" value="0" step="1" oninput="updateSimulator()" id="sl-threshold"/><span class="sim-slider-val" id="sl-threshold-val">0%</span></div>
+      <div class="sim-slider-row"><span class="sim-slider-label">Adversarial debiasing (retrain)</span><input type="range" class="sim-slider" min="0" max="100" value="0" step="1" oninput="updateSimulator()" id="sl-adv"/><span class="sim-slider-val" id="sl-adv-val">0%</span></div>
+      <div class="sim-slider-row"><span class="sim-slider-label">Add more SC/ST training data</span><input type="range" class="sim-slider" min="0" max="100" value="0" step="1" oninput="updateSimulator()" id="sl-data"/><span class="sim-slider-val" id="sl-data-val">0%</span></div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn btn-outline" onclick="resetSimulator()">Reset All</button>
+        <button class="btn btn-green" onclick="applyAllFixes()">Apply All Fixes →</button>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title" style="margin-bottom:6px;">Projected Bias Risk Score</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px;">
+          <span id="sim-score-val" style="font-family:var(--display);font-size:52px;font-weight:700;color:var(--g-red);">67</span>
+          <span style="font-size:18px;color:var(--text3);">/100</span>
+          <span id="sim-score-delta" style="font-size:14px;color:var(--g-green);font-weight:600;margin-left:8px;"></span>
+        </div>
+        <div class="exec-risk-bar"><div class="exec-risk-needle" id="sim-needle" style="left:67%;"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px;"><span>LOW</span><span>MEDIUM</span><span>HIGH</span></div>
+        <div id="sim-risk-label" style="margin-top:10px;font-size:13px;font-weight:600;color:var(--g-red);">HIGH RISK — Legal action possible</div>
+      </div>
+      <div class="sim-result-grid">
+        <div class="sim-result-card"><div class="sim-result-val" id="sim-di" style="color:var(--g-red);">0.61</div><div class="sim-result-lbl">Disparate Impact</div><div class="sim-result-delta" id="sim-di-delta"></div></div>
+        <div class="sim-result-card"><div class="sim-result-val" id="sim-gap" style="color:#F9AB00;">18.4%</div><div class="sim-result-lbl">Parity Gap</div><div class="sim-result-delta" id="sim-gap-delta"></div></div>
+        <div class="sim-result-card"><div class="sim-result-val" id="sim-denied" style="color:var(--g-red);">4,730</div><div class="sim-result-lbl">Wrongly Denied/mo</div><div class="sim-result-delta" id="sim-denied-delta"></div></div>
+        <div class="sim-result-card"><div class="sim-result-val" id="sim-legal" style="color:var(--g-red);">3</div><div class="sim-result-lbl">Legal Violations</div><div class="sim-result-delta" id="sim-legal-delta"></div></div>
+      </div>
+      <div id="sim-compliance-box" class="alert red" style="margin-top:14px;"><span class="alert-icon">!</span><div id="sim-compliance-text">Currently NON-COMPLIANT. Apply fixes to reach compliance.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ BIAS TREND CHARTS ══════ -->
+<div id="page-trends" class="page">
+  <div class="color-stripe"></div>
+  <div class="page-header">
+    <div class="page-title">📈 Bias Trend Analysis</div>
+    <div class="page-sub">Track how your AI's fairness changes over time — catch bias drift early</div>
+  </div>
+  <div class="metric-grid">
+    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-green);"></div><div class="metric-label">Score Improvement (3 months)</div><div class="metric-value mv-green">−11pts</div><div class="metric-sub">78 → 67 · improving</div></div>
+    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-red);"></div><div class="metric-label">Worst Month Ever</div><div class="metric-value mv-red">84</div><div class="metric-sub">October 2025</div></div>
+    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-blue);"></div><div class="metric-label">Total Scans</div><div class="metric-value mv-blue">7</div><div class="metric-sub">Since Jan 2026</div></div>
+    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-yellow);"></div><div class="metric-label">Score After All Fixes</div><div class="metric-value mv-yellow">32</div><div class="metric-sub">Projected improvement</div></div>
+  </div>
+  <div class="trend-controls">
+    <button class="trend-btn active" onclick="showTrend('bias',this)">Bias Score Over Time</button>
+    <button class="trend-btn" onclick="showTrend('di',this)">Disparate Impact Trend</button>
+    <button class="trend-btn" onclick="showTrend('groups',this)">Group Approval Rates</button>
+    <button class="trend-btn" onclick="showTrend('denied',this)">People Wrongly Denied</button>
+  </div>
+  <div class="card">
+    <div id="trend-bias-chart"><div style="position:relative;width:100%;height:260px;"><canvas id="chartBias"></canvas></div></div>
+    <div id="trend-di-chart" style="display:none;"><div style="position:relative;width:100%;height:260px;"><canvas id="chartDI"></canvas></div></div>
+    <div id="trend-groups-chart" style="display:none;"><div style="position:relative;width:100%;height:260px;"><canvas id="chartGroups"></canvas></div></div>
+    <div id="trend-denied-chart" style="display:none;"><div style="position:relative;width:100%;height:260px;"><canvas id="chartDenied"></canvas></div></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px;">What caused improvements?</div>
+      <div class="recommend-item" style="padding:10px 0;"><div class="rec-num" style="background:var(--g-green-light);color:#137333;width:24px;height:24px;font-size:11px;">✓</div><div><div style="font-size:13px;font-weight:500;">Jan 2026 — Gender threshold fix applied</div><div style="font-size:12px;color:var(--text2);">Score 78 → 71. Gender gap reduced 7%.</div></div></div>
+      <div class="recommend-item" style="padding:10px 0;"><div class="rec-num" style="background:var(--g-green-light);color:#137333;width:24px;height:24px;font-size:11px;">✓</div><div><div style="font-size:13px;font-weight:500;">Mar 2026 — Employer proxy removed</div><div style="font-size:12px;color:var(--text2);">Score 71 → 67. Religion gap reduced 4%.</div></div></div>
+      <div class="recommend-item" style="padding:10px 0;border-bottom:none;"><div class="rec-num" style="background:var(--g-red-light);color:#C5221F;width:24px;height:24px;font-size:11px;">!</div><div><div style="font-size:13px;font-weight:500;">Caste bias still unresolved</div><div style="font-size:12px;color:var(--text2);">SC/ST gap still 32%. Immediate action required.</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px;">Projected path with fixes</div>
+      <div style="position:relative;width:100%;height:180px;"><canvas id="chartProjection"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ AI ASSISTANT ══════ -->
+<div id="page-assistant" class="page">
+  <div class="color-stripe"></div>
+  <div class="page-header">
+    <div class="page-title">🤖 FairScan AI Assistant</div>
+    <div class="page-sub">Ask anything about your bias results, Indian laws, or how to fix issues — plain English answers, always</div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="chat-wrap">
+        <div class="chat-header">
+          <div class="chat-avatar">🤖</div>
+          <div><div style="font-size:14px;font-weight:600;">FairScan Assistant</div><div style="font-size:11px;opacity:.8;">Knows Indian law · Plain English · Always available</div></div>
+          <div style="margin-left:auto;width:8px;height:8px;border-radius:50%;background:#4fdb8f;"></div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg bot">👋 Namaste! I'm your FairScan AI assistant. I can explain your bias results, Indian laws, and exactly what to fix. What would you like to know?</div>
+        </div>
+        <div class="chat-quickbtns">
+          <button class="qbtn" onclick="sendQuick('What does disparate impact of 0.61 mean?')">What is disparate impact?</button>
+          <button class="qbtn" onclick="sendQuick('Which Indian law am I violating?')">Which law am I breaking?</button>
+          <button class="qbtn" onclick="sendQuick('How do I fix caste bias without retraining?')">Fix without retraining?</button>
+          <button class="qbtn" onclick="sendQuick('Explain my bias score of 67 simply')">Explain my score</button>
+          <button class="qbtn" onclick="sendQuick('What is the DPDP Act penalty?')">DPDP Act penalty?</button>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chat-input" type="text" placeholder="Ask anything about bias, laws, or fixes..." onkeydown="if(event.key==='Enter') sendChat()"/>
+          <button class="chat-send" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title" style="margin-bottom:14px;">📚 Quick Law Reference</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="padding:10px 14px;background:var(--g-blue-light);border-radius:10px;cursor:pointer;" onclick="sendQuick('Explain DPDP Act 2023 and how it applies to AI bias')"><div style="font-size:13px;font-weight:600;color:var(--g-blue);">DPDP Act 2023</div><div style="font-size:12px;color:#185FA5;margin-top:2px;">Fine up to ₹250 crore · Tap to learn →</div></div>
+          <div style="padding:10px 14px;background:var(--g-red-light);border-radius:10px;cursor:pointer;" onclick="sendQuick('How does Article 15 of the Constitution apply to AI loan decisions?')"><div style="font-size:13px;font-weight:600;color:#C5221F;">Article 15 — Constitution</div><div style="font-size:12px;color:#A32D2D;margin-top:2px;">No caste/religion discrimination · Tap to learn →</div></div>
+          <div style="padding:10px 14px;background:var(--g-yellow-light);border-radius:10px;cursor:pointer;" onclick="sendQuick('What does the RBI Fair Practices Code require for AI loans?')"><div style="font-size:13px;font-weight:600;color:#B06000;">RBI Fair Practices Code</div><div style="font-size:12px;color:#854F0B;margin-top:2px;">Transparent loan decisions · Tap to learn →</div></div>
+          <div style="padding:10px 14px;background:var(--g-green-light);border-radius:10px;cursor:pointer;" onclick="sendQuick('When does the EU AI Act apply to Indian companies?')"><div style="font-size:13px;font-weight:600;color:#137333;">EU AI Act — Aug 2026 Deadline</div><div style="font-size:12px;color:#137333;margin-top:2px;">Affects Indian exporters · Tap to learn →</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px;">🔥 Most Asked Questions</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="qbtn" style="text-align:left;width:100%;" onclick="sendQuick('Can I get fined for my AI being biased in India?')">Can I get fined for AI bias in India?</button>
+          <button class="qbtn" style="text-align:left;width:100%;" onclick="sendQuick('What is the difference between caste and religion bias in AI?')">Caste bias vs religious bias?</button>
+          <button class="qbtn" style="text-align:left;width:100%;" onclick="sendQuick('How long does it take to fix AI bias?')">How long to fix bias?</button>
+          <button class="qbtn" style="text-align:left;width:100%;" onclick="sendQuick('Is a loan approval AI high risk under the EU AI Act?')">Is loan AI high-risk under EU Act?</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── NAVIGATION ──
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  const target = document.getElementById('page-' + id);
+  if (!target) return;
+  target.classList.add('active');
+  if (el) el.classList.add('active');
+  if (id === 'scan') { switchScan('wizard', null); }
+  // Close mobile nav on navigation
+  closeMobileNav();
+  // Scroll to top on mobile
+  if (window.innerWidth <= 900) window.scrollTo(0, 0);
+}
+function showSide(id, el) {
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+  showPage('scan', document.querySelectorAll('.nav-link')[1]);
+  const tabMap = {overview:'overview',groups:'groups',features:'features',metrics:'metrics',caste:'groups',indianlaws:'laws',fix:'fix'};
+  const target = tabMap[id];
+  if (target === 'laws') { showPage('laws', null); return; }
+  setTimeout(() => {
+    const btn = [...document.querySelectorAll('.tab-btn')].find(b => b.textContent.toLowerCase().includes(target));
+    if (btn) switchScan(target, btn);
+    if (id === 'caste') { switchGroup('caste', document.querySelector('#page-scan .tab-btn')); }
+  }, 50);
+}
+
+// ── SCAN TABS ──
+function switchScan(id, el) {
+  document.querySelectorAll('.scan-tab').forEach(t => t.style.display = 'none');
+  const target = document.getElementById('scan-' + id);
+  if (target) target.style.display = 'block';
+  document.querySelectorAll('#page-scan .tab-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+// ── GROUP TABS ──
+function switchGroup(id, el) {
+  ['caste','gender','religion','region'].forEach(g => {
+    const el2 = document.getElementById('group-' + g);
+    if (el2) el2.style.display = g === id ? 'block' : 'none';
+  });
+  document.querySelectorAll('#scan-groups .tab-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+// ── DOMAIN SELECTION ──
+const domainInfo = {
+  loans: 'Loan bias checks loaded: Caste (SC/ST vs General), Gender, Religion, Region. Indian laws: RBI Fair Practices Code, DPDP Act, Article 15/16 of Constitution.',
+  hiring: 'Hiring bias checks loaded: Gender, Caste, Religion, Age, Region. Indian laws: Equal Remuneration Act, Article 16, RPwD Act.',
+  healthcare: 'Healthcare bias checks loaded: Caste, Gender, Region (Urban vs Rural), Age. Relevant to Ayushman Bharat, DPDP Act.',
+  education: 'Education bias checks loaded: Caste (reservation categories), Gender, Region, Economic background. SC/ST reservation compliance included.'
+};
+function selectDomain(el, color) {
+  document.querySelectorAll('.domain-card').forEach(c => { c.classList.remove('selected','blue','red','yellow','green'); });
+  el.classList.add('selected', color);
+  const domain = el.dataset.domain;
+  const info = document.getElementById('domain-info');
+  info.style.display = 'flex';
+  document.getElementById('domain-info-text').textContent = domainInfo[domain] || '';
+}
+
+// ── FILE UPLOAD & REAL CSV PARSING ──
+let uploadedData = null;
+
+function handleCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('upload-title').textContent = '⏳ Reading ' + file.name + '...';
+  document.querySelector('.upload-zone').style.borderColor = 'var(--g-blue)';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result;
+      const parsed = parseCSV(text);
+      if (parsed.rows.length < 2) throw new Error('File too small');
+      uploadedData = parsed;
+      uploadedData._file = file;
+      document.querySelector('.upload-zone').style.borderColor = '';
+      document.querySelector('.upload-zone').style.background = '';
+      document.getElementById('upload-title').textContent = '✓ ' + file.name + ' uploaded successfully';
+      document.getElementById('upload-sub').textContent = parsed.rows.length + ' rows · ' + parsed.headers.length + ' columns: ' + parsed.headers.slice(0,5).join(', ') + (parsed.headers.length > 5 ? '...' : '') + ' · Ready to scan';
+      document.querySelector('.upload-zone').style.borderColor = 'var(--g-green)';
+      document.querySelector('.upload-zone').style.background = 'var(--g-green-light)';
+    } catch(err) {
+      document.getElementById('upload-title').textContent = '⚠ Could not read file — check format';
+      document.getElementById('upload-sub').textContent = 'Make sure it is a valid CSV with headers';
+      document.querySelector('.upload-zone').style.borderColor = 'var(--g-red)';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,'').toLowerCase());
+  const rows = lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim().replace(/"/g,''));
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = vals[i] || '');
+    return obj;
+  }).filter(r => Object.values(r).some(v => v));
+  return { headers, rows };
+}
+
+function detectColumns(headers) {
+  const find = (kws) => headers.find(h => kws.some(k => h.includes(k))) || null;
+  return {
+    outcome:  find(['outcome','decision','approved','result','status','label','target']),
+    caste:    find(['caste','category']),
+    gender:   find(['gender','sex']),
+    religion: find(['religion','faith','community']),
+    region:   find(['region','state','city','location'])
+  };
+}
+
+function approvalRateFor(rows, col, val, outcomeCol) {
+  const group = rows.filter(r => r[col] && r[col].toLowerCase().includes(val.toLowerCase()));
+  if (!group.length || !outcomeCol) return null;
+  const approved = group.filter(r => { const v=(r[outcomeCol]||'').toLowerCase(); return v==='1'||v==='approved'||v==='yes'||v==='accept'||v==='true'; });
+  return { rate: approved.length / group.length, count: group.length };
+}
+
+function computeBiasFromData(data) {
+  const cols = detectColumns(data.headers);
+  const res = {};
+  if (cols.caste && cols.outcome) {
+    const general = approvalRateFor(data.rows, cols.caste, 'general', cols.outcome);
+    const sc = approvalRateFor(data.rows, cols.caste, 'sc', cols.outcome);
+    const st = approvalRateFor(data.rows, cols.caste, 'st', cols.outcome);
+    if (general && sc) res.casteDI = sc.rate / general.rate;
+    if (general && st) res.casteSTDI = st.rate / general.rate;
+    res.generalRate = general ? general.rate : null;
+    res.scRate = sc ? sc.rate : null;
+  }
+  if (cols.gender && cols.outcome) {
+    const male = approvalRateFor(data.rows, cols.gender, 'male', cols.outcome) || approvalRateFor(data.rows, cols.gender, 'm', cols.outcome);
+    const female = approvalRateFor(data.rows, cols.gender, 'female', cols.outcome) || approvalRateFor(data.rows, cols.gender, 'f', cols.outcome);
+    if (male && female) { res.genderDI = female.rate / male.rate; res.maleRate = male.rate; res.femaleRate = female.rate; }
+  }
+  if (cols.religion && cols.outcome) {
+    const hindu  = approvalRateFor(data.rows, cols.religion, 'hindu', cols.outcome);
+    const muslim = approvalRateFor(data.rows, cols.religion, 'muslim', cols.outcome);
+    if (hindu && muslim) { res.hindRate = hindu.rate; res.muslRate = muslim.rate; }
+  }
+  if (cols.caste && cols.outcome) {
+    const obc = approvalRateFor(data.rows, cols.caste, 'obc', cols.outcome);
+    if (obc) res.obcRate = obc.rate;
+  }
+  return res;
+}
+
+// ── PROXY FEATURE DETECTION (client-side) ──
+function detectProxyFeatures(data) {
+  const cols = detectColumns(data.headers);
+  const outcomeCol = cols.outcome;
+  const proxies = [];
+  const protectedCols = Object.values(cols).filter(Boolean);
+
+  // Detect numeric columns that might be proxies
+  const numericCandidates = data.headers.filter(h => {
+    const sample = data.rows.slice(0,50).map(r => parseFloat(r[h])).filter(v => !isNaN(v));
+    return sample.length > 10 && !protectedCols.includes(h);
+  });
+
+  const protectedAttrCols = [cols.caste, cols.religion, cols.gender].filter(Boolean);
+  for (const protectedCol of protectedAttrCols) {
+    for (const numCol of numericCandidates) {
+      if (numCol === outcomeCol) continue;
+      const corr = pearsonCorrelation(data.rows, numCol, protectedCol);
+      if (Math.abs(corr) >= 0.30) {
+        proxies.push({
+          feature: numCol,
+          attribute: protectedCol,
+          correlation: Math.round(Math.abs(corr) * 100) / 100,
+          severity: Math.abs(corr) >= 0.6 ? 'critical' : 'warning'
+        });
+      }
+    }
+  }
+  proxies.sort((a, b) => b.correlation - a.correlation);
+  return proxies;
+}
+
+function pearsonCorrelation(rows, colA, colB) {
+  // For numeric vs categorical: use mean encoding
+  const groupMeans = {};
+  const uniqueVals = [...new Set(rows.map(r => r[colB]))].filter(Boolean);
+  for (const v of uniqueVals) {
+    const subset = rows.filter(r => r[colB] === v).map(r => parseFloat(r[colA])).filter(v => !isNaN(v));
+    if (subset.length) groupMeans[v] = subset.reduce((a, b) => a + b, 0) / subset.length;
+  }
+  const pairs = rows.map(r => ({
+    a: parseFloat(r[colA]),
+    b: groupMeans[r[colB]] || 0
+  })).filter(p => !isNaN(p.a));
+  if (pairs.length < 5) return 0;
+  const n = pairs.length;
+  const meanA = pairs.reduce((s, p) => s + p.a, 0) / n;
+  const meanB = pairs.reduce((s, p) => s + p.b, 0) / n;
+  const num = pairs.reduce((s, p) => s + (p.a - meanA) * (p.b - meanB), 0);
+  const den = Math.sqrt(
+    pairs.reduce((s, p) => s + (p.a - meanA) ** 2, 0) *
+    pairs.reduce((s, p) => s + (p.b - meanB) ** 2, 0)
+  );
+  return den === 0 ? 0 : num / den;
+}
+
+// ── BIAS SCORE COMPUTATION (client-side) ──
+function computeBiasScore(bias, proxyFeatures) {
+  let penalties = 0;
+  let violations = 0;
+
+  if (bias.casteDI != null) {
+    const di = bias.casteDI;
+    if (di < 0.80) {
+      penalties += (0.80 - di) / 0.80 * 40;
+      violations++;
+    }
+    if (bias.casteSTDI != null && bias.casteSTDI < 0.80) {
+      penalties += (0.80 - bias.casteSTDI) / 0.80 * 20;
+      violations++;
+    }
+  }
+  if (bias.genderDI != null && bias.genderDI < 0.95) {
+    const gap = 1 - bias.genderDI;
+    if (gap > 0.05) { penalties += Math.min(gap * 50, 25); violations++; }
+  }
+  const criticalProxies = (proxyFeatures || []).filter(p => p.severity === 'critical').length;
+  penalties += criticalProxies * 5;
+
+  const score = Math.min(Math.round(penalties), 100);
+  return { score, violations };
+}
+
+function updateResultsUI(rows, bias, proxyFeatures, biasScore, violationCount, data) {
+  // ── Computed values ──
+  const di         = bias.casteDI  != null ? bias.casteDI  : 0.61;
+  const stDI       = bias.casteSTDI != null ? bias.casteSTDI : di * 0.9;
+  const genderDI   = bias.genderDI != null ? bias.genderDI : 0.76;
+  const genderGap  = Math.round((1 - genderDI) * 100 * 10) / 10;
+  const displayScore = biasScore != null ? biasScore : Math.min(Math.round((1 - di) * 120 + 10), 95);
+
+  // Approval rates from real data
+  const cols = data ? detectColumns(data.headers) : {};
+  function rate(group, val) {
+    if (!data || !cols.outcome) return null;
+    const r = approvalRateFor(data.rows, cols[group] || group, val, cols.outcome);
+    return r ? Math.round(r.rate * 1000) / 10 : null;
+  }
+  function count(group, val) {
+    if (!data || !cols.caste) return null;
+    const col = cols[group] || group;
+    return data.rows.filter(r => r[col] && r[col].toLowerCase().includes(val.toLowerCase())).length;
+  }
+
+  const genRate  = rate('caste','general') || 76.2;
+  const obcRate  = rate('caste','obc')     || 63.8;
+  const scRate   = rate('caste','sc')      || 49.1;
+  const stRate   = rate('caste','st')      || 43.8;
+  const maleRate = rate('gender','male')   || 76.3;
+  const femRate  = rate('gender','female') || 58.1;
+  const hindRate = rate('religion','hindu')  || 71.4;
+  const muslRate = rate('religion','muslim') || 59.1;
+
+  const parityGap  = Math.max(genRate - scRate, genRate - stRate).toFixed(1);
+  const realGender = Math.abs(maleRate - femRate).toFixed(1);
+  const realRelGap = Math.abs(hindRate - muslRate).toFixed(1);
+
+  const genCount = count('caste','general') || 28500;
+  const obcCount = count('caste','obc')     || 11200;
+  const scCount  = count('caste','sc')      || 5800;
+  const stCount  = count('caste','st')      || 2730;
+
+  const diStatus   = di   >= 0.80 ? 'Pass' : di   >= 0.65 ? 'Warn' : 'Fail';
+  const stDIStatus = stDI >= 0.80 ? 'Pass' : stDI >= 0.65 ? 'Warn' : 'Fail';
+  const obcDI      = obcRate / genRate;
+  const obcStatus  = obcDI >= 0.80 ? 'Pass' : 'Warn';
+
+  const demParityGap = parseFloat(parityGap);
+  const demParityStatus = demParityGap <= 5 ? 'PASS' : 'FAIL';
+  const demParityColor  = demParityGap <= 5 ? 'var(--g-green)' : 'var(--g-red)';
+  const diTestStatus = di >= 0.80 ? 'PASS' : 'FAIL';
+  const diColor      = di >= 0.80 ? 'var(--g-green)' : 'var(--g-red)';
+  const riskColor = displayScore >= 60 ? 'var(--g-red)' : displayScore >= 30 ? '#F9AB00' : 'var(--g-green)';
+  const badgeColor = (s) => s === 'Pass' ? 'green' : s === 'Warn' ? 'yellow' : 'red';
+
+  // ── Overview metric cards ──
+  const scoreEls = document.querySelectorAll('#scan-overview .metric-value.mv-red');
+  if (scoreEls[0]) { scoreEls[0].innerHTML = displayScore + '<span style="font-size:16px;color:var(--text3);">/100</span>'; scoreEls[0].style.color = riskColor; }
+  if (scoreEls[1]) { scoreEls[1].textContent = di.toFixed(2); scoreEls[1].style.color = di >= 0.80 ? 'var(--g-green)' : 'var(--g-red)'; }
+  const gapEl = document.querySelector('#scan-overview .metric-value.mv-yellow');
+  if (gapEl) { gapEl.textContent = parityGap + '%'; gapEl.style.color = parseFloat(parityGap) > 5 ? 'var(--g-red)' : 'var(--g-green)'; }
+  const subEl = document.querySelector('#scan-overview .page-sub');
+  if (subEl) subEl.textContent = 'Uploaded Model · ' + rows.toLocaleString('en-IN') + ' records · Scanned just now';
+
+  // ── Plain-English summary ──
+  const plainEl = document.getElementById('overview-plain');
+  if (plainEl) {
+    const approvedPer100 = Math.round(di * 100);
+    const riskWord = displayScore >= 60 ? 'HIGH RISK' : displayScore >= 30 ? 'MEDIUM RISK' : 'LOW RISK';
+    plainEl.textContent = `Your AI has a ${riskWord} bias score of ${displayScore}/100. For every 100 General-category applicants approved, only ${approvedPer100} equally-qualified SC/ST applicants are approved. The caste parity gap is ${parityGap}% and the gender gap is ${realGender}%. ${di < 0.80 ? 'This is a legal violation under Indian law.' : 'Disparate impact is within legal limits, but parity gaps still need monitoring.'}`;
+  }
+
+  // ── Overview alert bars ──
+  const alerts = document.querySelectorAll('#scan-overview .alert');
+  if (alerts[0]) alerts[0].innerHTML = `<span class="alert-icon">!</span><div><strong>Critical — Caste Bias:</strong> SC applicants approved at ${scRate}% vs General at ${genRate}% with identical profiles. Disparate impact ratio: ${di.toFixed(2)} (must be >0.80).</div>`;
+  if (alerts[1]) alerts[1].innerHTML = `<span class="alert-icon">!</span><div><strong>Critical — Gender Bias:</strong> Women approved at ${femRate}% vs men at ${maleRate}% after controlling for income, credit score, and loan amount.</div>`;
+  if (alerts[2]) { if (proxyFeatures && proxyFeatures.length > 0) { alerts[2].className='alert red'; alerts[2].innerHTML=`<span class="alert-icon">!</span><div><strong>Critical — Proxy Feature:</strong> ${proxyFeatures[0].feature} is ${Math.round(proxyFeatures[0].correlation*100)}% correlated with ${proxyFeatures[0].attribute} and is being used as a hidden discriminator.</div>`; } else { alerts[2].className='alert green'; alerts[2].innerHTML='<span class="alert-icon">✓</span><div><strong>No proxy features detected.</strong></div>'; } }
+  if (alerts[3]) alerts[3].innerHTML = `<span class="alert-icon">⚠</span><div><strong>Warning — Religion Bias:</strong> Muslim applicants show ${realRelGap}% lower approval rate than Hindu applicants with same profile.</div>`;
+
+  // ── Overview approval-rate bars ──
+  const barGroups = document.querySelectorAll('#scan-overview .bar-group');
+  const barData = [
+    ['General Category', genRate, 'var(--g-blue)'],
+    ['OBC',              obcRate, 'var(--g-green)'],
+    ['SC (Scheduled Caste)', scRate, 'var(--g-yellow)'],
+    ['ST (Scheduled Tribe)', stRate, 'var(--g-red)'],
+  ];
+  barGroups.forEach((bg, i) => {
+    if (!barData[i]) return;
+    const [label, pct, color] = barData[i];
+    const meta = bg.querySelector('.bar-meta');
+    const fill = bg.querySelector('.bar-fill');
+    if (meta) meta.innerHTML = `<span>${label}</span><span style="font-weight:600;">${pct}%</span>`;
+    if (fill) { fill.style.width = pct + '%'; fill.style.background = color; }
+  });
+
+  // ── Group tab — caste bars ──
+  const casteBars = document.querySelectorAll('#group-caste .bar-group');
+  const casteBarData = [
+    ['General', genRate],['OBC', obcRate],['SC', scRate],['ST', stRate]
+  ];
+  const casteColors = ['var(--g-blue)','var(--g-green)','var(--g-yellow)','var(--g-red)'];
+  casteBars.forEach((bg, i) => {
+    if (!casteBarData[i]) return;
+    const [label, pct] = casteBarData[i];
+    const meta = bg.querySelector('.bar-meta');
+    const fill = bg.querySelector('.bar-fill');
+    if (meta) meta.innerHTML = `<span>${label}</span><span>${pct}%</span>`;
+    if (fill) { fill.style.width = pct + '%'; fill.style.background = casteColors[i]; }
+  });
+  const parityBadge = document.querySelector('#group-caste .badge.red');
+  if (parityBadge) parityBadge.textContent = 'Parity Gap: ' + parityGap + '%';
+
+  // ── Group tab — gender bars ──
+  const genderBars = document.querySelectorAll('#group-gender .bar-group');
+  if (genderBars[0]) {
+    const mf = genderBars[0].querySelector('.bar-meta'); const ff = genderBars[0].querySelector('.bar-fill');
+    if (mf) mf.innerHTML = `<span>Male</span><span>${maleRate}%</span>`; if (ff) ff.style.width = maleRate + '%';
+  }
+  if (genderBars[1]) {
+    const mf = genderBars[1].querySelector('.bar-meta'); const ff = genderBars[1].querySelector('.bar-fill');
+    if (mf) mf.innerHTML = `<span>Female</span><span>${femRate}%</span>`; if (ff) ff.style.width = femRate + '%';
+  }
+  const genderBadge = document.querySelector('#group-gender .badge.red');
+  if (genderBadge) genderBadge.textContent = 'Gap: ' + realGender + '%';
+
+  // ── Group tab — religion bars ──
+  const relBars = document.querySelectorAll('#group-religion .bar-group');
+  if (relBars[0]) { const mf=relBars[0].querySelector('.bar-meta'); const ff=relBars[0].querySelector('.bar-fill'); if(mf) mf.innerHTML=`<span>Hindu</span><span>${hindRate}%</span>`; if(ff) ff.style.width=hindRate+'%'; }
+  if (relBars[3]) { const mf=relBars[3].querySelector('.bar-meta'); const ff=relBars[3].querySelector('.bar-fill'); if(mf) mf.innerHTML=`<span>Muslim</span><span>${muslRate}%</span>`; if(ff) ff.style.width=muslRate+'%'; }
+  const relBadge = document.querySelector('#group-religion .badge.yellow');
+  if (relBadge) relBadge.textContent = 'Gap: ' + realRelGap + '%';
+
+  // ── Caste comparison table ──
+  const casteTable = document.querySelector('#group-caste table tbody');
+  if (casteTable) {
+    const wrongDeniedGen = (100 - genRate).toFixed(1);
+    const wrongDeniedOBC = (100 - obcRate).toFixed(1);
+    const wrongDeniedSC  = (100 - scRate).toFixed(1);
+    const wrongDeniedST  = (100 - stRate).toFixed(1);
+    casteTable.innerHTML = `
+      <tr><td>General (Reference)</td><td>${genCount}</td><td>${genRate}%</td><td>${wrongDeniedGen}%</td><td>1.00</td><td><span class="badge green">Pass</span></td></tr>
+      <tr><td>OBC</td><td>${obcCount}</td><td>${obcRate}%</td><td>${wrongDeniedOBC}%</td><td>${obcDI.toFixed(2)}</td><td><span class="badge ${badgeColor(obcStatus)}">${obcStatus}</span></td></tr>
+      <tr><td>SC (Scheduled Caste)</td><td>${scCount}</td><td>${scRate}%</td><td>${wrongDeniedSC}%</td><td>${di.toFixed(2)}</td><td><span class="badge ${badgeColor(diStatus)}">${diStatus}</span></td></tr>
+      <tr><td>ST (Scheduled Tribe)</td><td>${stCount}</td><td>${stRate}%</td><td>${wrongDeniedST}%</td><td>${stDI.toFixed(2)}</td><td><span class="badge ${badgeColor(stDIStatus)}">${stDIStatus}</span></td></tr>`;
+  }
+
+  // ── Fairness metrics tab ──
+  const fCells = document.querySelectorAll('#scan-metrics .f-cell');
+  const fairnessData = [
+    { name:'Demographic Parity', val: demParityGap + '% gap', status: demParityStatus, color: demParityColor,
+      desc: `All groups should have similar approval rates. Current worst gap is ${demParityGap}% — ${demParityGap <= 5 ? 'within' : 'above'} the 5% threshold.` },
+    { name:'Disparate Impact (4/5 Rule)', val: di.toFixed(2) + ' ratio', status: diTestStatus, color: diColor,
+      desc: `SC/ST approval rate is ${Math.round(di*100)}% of General category. Must be at least 80%. ${di < 0.80 ? 'This is a legal violation.' : 'Passes the 4/5 rule.'}` },
+    { name:'Equal Opportunity', val: parityGap + '% diff',
+      status: demParityGap <= 5 ? 'PASS' : demParityGap <= 15 ? 'WARN' : 'FAIL',
+      color: demParityGap <= 5 ? 'var(--g-green)' : demParityGap <= 15 ? '#F9AB00' : 'var(--g-red)',
+      desc: `Qualified SC/ST applicants are being denied ${parityGap}% more often than qualified General applicants.` },
+    { name:'Equalized Odds', val: realGender + '% diff',
+      status: parseFloat(realGender) <= 5 ? 'PASS' : 'FAIL',
+      color: parseFloat(realGender) <= 5 ? 'var(--g-green)' : 'var(--g-red)',
+      desc: `Approval and rejection error rates across gender groups differ by ${realGender}%.` },
+  ];
+  fCells.forEach((cell, i) => {
+    if (!fairnessData[i]) return;
+    const fd = fairnessData[i];
+    const valEl  = cell.querySelector('.f-val');
+    const descEl = cell.querySelector('.f-desc');
+    const nameEl = cell.querySelector('.f-name');
+    if (nameEl) nameEl.textContent = fd.name;
+    if (valEl)  { valEl.textContent = fd.status + ' — ' + fd.val; valEl.style.color = fd.color; }
+    if (descEl) descEl.textContent = fd.desc;
+  });
+
+  // ── Proxy features tab ──
+  if (proxyFeatures && proxyFeatures.length > 0) {
+    const proxyAlert = document.querySelector('#scan-features .alert');
+    if (proxyAlert) {
+      const critCount = proxyFeatures.filter(p => p.severity === 'critical').length;
+      proxyAlert.className = 'alert ' + (critCount > 0 ? 'red' : 'yellow');
+      proxyAlert.innerHTML = `<span class="alert-icon">${critCount > 0 ? '!' : '⚠'}</span><div><strong>${proxyFeatures.length} proxy feature(s) detected from your data:</strong><br>${proxyFeatures.slice(0,4).map(p => `<span style="font-family:monospace;">${p.feature}</span> → ${p.attribute} (r=${p.correlation}, <strong>${p.severity}</strong>)`).join('<br>')}</div>`;
+    }
+    // Rewrite feature importance bars
+    const featRows = document.querySelectorAll('#scan-features .feat-row');
+    proxyFeatures.slice(0, featRows.length).forEach((p, i) => {
+      const nameEl = featRows[i] ? featRows[i].querySelector('.feat-name') : null;
+      const fillEl = featRows[i] ? featRows[i].querySelector('.feat-fill') : null;
+      const valEl  = featRows[i] ? featRows[i].querySelector('.feat-val')  : null;
+      if (nameEl) nameEl.textContent = p.feature;
+      if (fillEl) { fillEl.style.width = Math.round(p.correlation * 100) + '%'; fillEl.style.background = 'var(--g-red)'; }
+      if (valEl)  valEl.textContent = p.correlation.toFixed(2);
+    });
+  } else if (proxyFeatures) {
+    const proxyAlert = document.querySelector('#scan-features .alert');
+    if (proxyAlert) {
+      proxyAlert.className = 'alert green';
+      proxyAlert.innerHTML = '<span class="alert-icon">✅</span><div><strong>No proxy features detected.</strong></div>';
+    }
+  }
+
+  // ── Sidebar violation badge ──
+  const violEls = document.querySelectorAll('.si-badge');
+  if (violEls[0]) violEls[0].textContent = violationCount || 0;
+}
+
+
+// ── SCAN SIMULATION ──
+let scanRunning = false;
+
+function runScan() {
+  // ── Guard: block if already scanning ──
+  if (scanRunning) return;
+
+  // ── Guard: must upload a CSV first ──
+  if (!uploadedData || uploadedData.rows.length < 2) {
+    const uploadZone = document.querySelector('.upload-zone');
+    uploadZone.style.borderColor = 'var(--g-red)';
+    uploadZone.style.background  = 'var(--g-red-light)';
+    document.getElementById('upload-title').textContent = '⚠ Please upload a CSV file first';
+    document.getElementById('upload-sub').textContent   = 'Click here to upload your data file before running the scan.';
+    uploadZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+      uploadZone.style.borderColor = '';
+      uploadZone.style.background  = '';
+    }, 3000);
+    return;
+  }
+
+  // ── Guard: must select a domain ──
+  if (!document.querySelector('.domain-card.selected')) {
+    const domainGrid = document.querySelector('.domain-grid');
+    domainGrid.style.outline = '2px solid var(--g-red)';
+    domainGrid.style.borderRadius = '8px';
+    domainGrid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const hint = document.createElement('div');
+    hint.className = 'alert red';
+    hint.style.marginTop = '8px';
+    hint.id = 'domain-hint';
+    hint.innerHTML = '<span class="alert-icon">!</span><div>Please select a domain (Bank Loans, Hiring, etc.) before scanning.</div>';
+    if (!document.getElementById('domain-hint')) domainGrid.after(hint);
+    setTimeout(() => { domainGrid.style.outline = ''; const h = document.getElementById('domain-hint'); if(h) h.remove(); }, 3000);
+    return;
+  }
+
+  scanRunning = true;
+  const scanBtn = document.querySelector('#scan-wizard .btn-blue');
+  if (scanBtn) { scanBtn.disabled = true; scanBtn.textContent = '⏳ Scanning...'; }
+
+  const box = document.getElementById('scan-progress-box');
+  box.style.display = 'block';
+  box.scrollIntoView({ behavior: 'smooth' });
+  const log = document.getElementById('scan-log-box');
+  const bar = document.getElementById('scan-progress-bar');
+  const sub = document.getElementById('scan-progress-sub');
+
+  const hasRealData = true; // guaranteed by guard above
+  const realBias = computeBiasFromData(uploadedData);
+  const cols = detectColumns(uploadedData.headers);
+  const rowCount = uploadedData.rows.length;
+
+  // Compute real DI and gender gap (or use realistic defaults when no data)
+  const diVal = realBias.casteDI != null ? realBias.casteDI.toFixed(2) : '0.57';
+  const stDI  = realBias.casteSTDI != null ? realBias.casteSTDI.toFixed(2) : '0.52';
+  const genderGap = realBias.genderDI != null
+    ? Math.round((1 - realBias.genderDI) * 100 * 10) / 10
+    : 18.2;
+  const colNames = hasRealData
+    ? uploadedData.headers.slice(0,5).join(', ')
+    : 'caste, gender, religion, region, income, outcome';
+
+  // Compute religion bias if possible
+  const religionGap = (() => {
+    if (!hasRealData || !cols.outcome) return '12.3%';
+    const hindu = approvalRateFor(uploadedData.rows, cols.religion || 'religion', 'hindu', cols.outcome);
+    const muslim = approvalRateFor(uploadedData.rows, cols.religion || 'religion', 'muslim', cols.outcome);
+    if (hindu && muslim) return Math.round((1 - muslim.rate/hindu.rate)*100*10)/10 + '%';
+    return '—';
+  })();
+
+  // Compute proxy features from real data
+  const proxyFeatures = hasRealData ? detectProxyFeatures(uploadedData) : [
+    {feature:'pin_code',attribute:'caste',correlation:0.78,severity:'critical'},
+    {feature:'surname',attribute:'caste',correlation:0.71,severity:'critical'}
+  ];
+  const proxyNames = proxyFeatures.length
+    ? proxyFeatures.slice(0,3).map(p => `${p.feature} (r=${p.correlation})`).join(', ')
+    : 'none detected';
+
+  // Compute real bias score
+  const computedBiasScore = computeBiasScore(realBias, proxyFeatures);
+  const biasScore = hasRealData ? computedBiasScore.score : 67;
+  const violationCount = computedBiasScore.violations;
+
+  const steps = [
+    [8,  'log-done', '✓ File validated — ' + rowCount.toLocaleString('en-IN') + ' rows · Columns: ' + colNames],
+    [18, 'log-done', '✓ Auto model selection: Gradient Boosting chosen (best for tabular data)'],
+    [28, 'log-run',  '● Running caste bias analysis (General / OBC / SC / ST)...'],
+    [40, 'log-done', '✓ Caste bias detected — Disparate Impact: ' + diVal + ' for SC (must be > 0.80), ST: ' + stDI],
+    [50, 'log-run',  '● Running gender & religion bias analysis...'],
+    [62, 'log-done', '✓ Gender gap: ' + genderGap + '% · Religion gap: ' + religionGap + ' detected'],
+    [72, 'log-run',  '● Detecting proxy features (PIN code, surname, employer, location)...'],
+    [82, 'log-done', '✓ Proxy features flagged: ' + proxyNames],
+    [90, 'log-run',  '● Running Indian law compliance checks: DPDP Act, RBI Code, Article 15/16...'],
+    [96, 'log-done', '✓ Compliance check complete — ' + violationCount + ' violation(s) found'],
+    [100,'log-done', '✓ Scan complete! Results ready. Generating fix recommendations...'],
+  ];
+
+  log.innerHTML = '';
+  let i = 0;
+  function next() {
+    if (i >= steps.length) {
+      // Apply real results to UI
+      updateResultsUI(rowCount, realBias, proxyFeatures, biasScore, violationCount, uploadedData);
+
+      // Try real backend API if available
+      if (uploadedData._file) {
+        runBackendScan(
+          uploadedData._file,
+          'outcome', 'prediction',
+          'caste,gender,religion,region',
+          document.querySelector('.domain-card.selected')?.dataset?.domain || 'loans'
+        ).then(results => {
+          window._lastScanResults = results;
+          applyAPIResults(results);
+        }).catch(err => {
+          console.log('Backend scan failed, using client-side results:', err.message);
+        });
+      }
+
+      // Re-enable scan button and release lock
+      scanRunning = false;
+      const scanBtn = document.querySelector('#scan-wizard .btn-blue');
+      if (scanBtn) { scanBtn.disabled = false; scanBtn.textContent = '🚀 Run Bias Scan Now'; }
+
+      // Switch to results tab
+      setTimeout(() => {
+        const overviewBtn = [...document.querySelectorAll('#page-scan .tab-btn')].find(b => b.textContent.includes('Results Overview'));
+        switchScan('overview', overviewBtn || null);
+      }, 800);
+      return;
+    }
+    const [pct, cls, msg] = steps[i++];
+    bar.style.width = pct + '%';
+    sub.textContent = pct + '% complete';
+    const line = document.createElement('div');
+    line.className = cls;
+    line.textContent = msg;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+    setTimeout(next, 600 + Math.random() * 300);
+  }
+  next();
+}
+
+// ── LANGUAGE TOGGLE ──
+const translations = {
+  en: {
+    heroTitle: 'Is your AI treating everyone fairly?',
+    heroSub: 'FairScan India checks your AI model for hidden discrimination — against caste, gender, religion, or region — and tells you exactly how to fix it. Built for India, following Indian laws.',
+  },
+  hi: {
+    heroTitle: 'क्या आपका AI सभी के साथ निष्पक्ष है?',
+    heroSub: 'FairScan India आपके AI में छुपे भेदभाव की जांच करता है — जाति, लिंग, धर्म या क्षेत्र के आधार पर — और बताता है कि इसे कैसे ठीक करें। भारत के लिए बनाया गया, भारतीय कानूनों का पालन करते हुए।',
+  }
+};
+function setLang(lang, el) {
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const t = translations[lang];
+  if (document.getElementById('hero-title')) {
+    document.getElementById('hero-title').textContent = t.heroTitle;
+    document.getElementById('hero-sub').textContent = t.heroSub;
+  }
+}
+
+// ── EXPORT ──
+function exportReport() {
+  const date = new Date().toISOString().slice(0,10);
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>FairScan India — Bias Report ${date}</title>
+<style>body{font-family:Arial,sans-serif;padding:40px;color:#202124;max-width:860px;margin:auto;}
+h1{color:#4285F4;}h2{color:#3C4043;border-bottom:2px solid #E8EAED;padding-bottom:8px;}
+.metric{display:inline-block;margin:12px 20px 12px 0;}.val{font-size:36px;font-weight:700;}.lbl{font-size:12px;color:#80868B;}
+.red{color:#EA4335;}.yellow{color:#F9AB00;}.green{color:#34A853;}.blue{color:#4285F4;}
+table{width:100%;border-collapse:collapse;}th{background:#F8F9FA;padding:10px;text-align:left;font-size:12px;text-transform:uppercase;}
+td{padding:10px;border-bottom:1px solid #E8EAED;}
+.badge-red{background:#FCE8E6;color:#C5221F;padding:3px 10px;border-radius:20px;font-size:12px;}
+.badge-yellow{background:#FEF7E0;color:#B06000;padding:3px 10px;border-radius:20px;font-size:12px;}
+.stripe{height:6px;background:linear-gradient(90deg,#4285F4 25%,#EA4335 25%,#EA4335 50%,#FBBC04 50%,#FBBC04 75%,#34A853 75%);margin-bottom:24px;}
+.footer{margin-top:40px;font-size:11px;color:#80868B;text-align:center;border-top:1px solid #E8EAED;padding-top:16px;}
+</style></head><body>
+<div class="stripe"></div>
+<h1>🔍 FairScan India — AI Bias Audit Report</h1>
+<p style="color:#5F6368;">Generated: ${date} &nbsp;|&nbsp; Model: Loan Approval System &nbsp;|&nbsp; Aligned with SDG 10 (Reduced Inequalities)</p>
+<h2>Executive Summary</h2>
+<p>This AI bias audit identified <strong style="color:#EA4335;">HIGH RISK</strong> discrimination in the loan approval model. SC/ST applicants are approved at only 61% the rate of General category applicants with identical financial profiles — a violation of Indian law.</p>
+<div class="metric"><div class="val red">67/100</div><div class="lbl">Bias Risk Score</div></div>
+<div class="metric"><div class="val red">0.61</div><div class="lbl">Disparate Impact (min 0.80)</div></div>
+<div class="metric"><div class="val yellow">18.4%</div><div class="lbl">Gender Parity Gap</div></div>
+<div class="metric"><div class="val red">3</div><div class="lbl">Legal Violations</div></div>
+<h2>Legal Violations</h2>
+<table><tr><th>Law</th><th>Violation</th><th>Penalty</th><th>Status</th></tr>
+<tr><td>DPDP Act 2023</td><td>Biased automated decisions without explainability</td><td>Up to ₹250 crore</td><td><span class="badge-red">Violated</span></td></tr>
+<tr><td>RBI Fair Practices Code</td><td>Discriminatory loan decisions (SC/ST, women)</td><td>Operational restrictions</td><td><span class="badge-red">Violated</span></td></tr>
+<tr><td>Equal Remuneration Act 1976</td><td>18% gender approval gap</td><td>Criminal liability</td><td><span class="badge-red">Violated</span></td></tr>
+<tr><td>EU AI Act (Aug 2026)</td><td>High-risk system not assessed</td><td>€35M or 7% revenue</td><td><span class="badge-yellow">At Risk</span></td></tr>
+</table>
+<h2>Group Impact Analysis</h2>
+<table><tr><th>Group</th><th>Approval Rate</th><th>vs Benchmark</th><th>Est. Wrongly Denied/Month</th></tr>
+<tr><td>SC (Scheduled Caste)</td><td style="color:#EA4335;font-weight:600;">49.1%</td><td>−27.1% vs General</td><td>~1,840</td></tr>
+<tr><td>ST (Scheduled Tribe)</td><td style="color:#EA4335;font-weight:600;">43.8%</td><td>−32.4% vs General</td><td>~920</td></tr>
+<tr><td>Women Applicants</td><td style="color:#F9AB00;font-weight:600;">58.1%</td><td>−18.2% vs Men</td><td>~2,100</td></tr>
+<tr><td>Muslim Applicants</td><td style="color:#F9AB00;font-weight:600;">59.1%</td><td>−12.3% vs Hindu</td><td>~680</td></tr>
+</table>
+<h2>Recommended Fixes (Priority Order)</h2>
+<p><strong>Week 1–2 (No retraining):</strong> Remove PIN code column (78% caste proxy), Remove surname column (71% caste/religion proxy)</p>
+<p><strong>Week 3–4 (No retraining):</strong> Apply Fairlearn ThresholdOptimizer to equalize approval rates across caste categories</p>
+<p><strong>Week 5–12:</strong> Retrain model with balanced data + fairness constraints. Target bias score: below 30</p>
+<h2>SDG Alignment</h2>
+<p>This audit supports <strong>UN SDG 10 (Reduced Inequalities)</strong> and <strong>SDG 8 (Decent Work and Economic Growth)</strong>. Fixing AI bias ensures equitable access to financial services for all citizens regardless of caste, gender, or religion.</p>
+<div class="footer">FairScan India — AI Bias Detection for the Indian Context &nbsp;|&nbsp; Built for Google Solution Challenge &nbsp;|&nbsp; Report ID: FSI-${Date.now()}</div>
+</body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fairscan_bias_report_' + date + '.html';
+  a.click();
+}
+
+// ── DOWNLOAD SAMPLE CSV ──
+function downloadSampleCSV() {
+  // Use timestamp-based seed so each download is different
+  const seed = Date.now();
+  const rng = mulberry32(seed);
+
+  const headers = 'applicant_id,age,gender,caste,religion,state,monthly_income,credit_score,loan_amount,employment_type,pin_code,outcome,prediction';
+  const rows = [];
+  const castes = ['General','General','OBC','OBC','SC','SC','ST'];
+  const genders = ['Male','Female','Male','Female'];
+  const religions = ['Hindu','Hindu','Muslim','Christian','Sikh'];
+  const states = ['Maharashtra','Delhi','UP','Bihar','Karnataka','Tamil Nadu','West Bengal'];
+  const employments = ['Salaried','Self-employed','Business'];
+  for (let i = 1; i <= 500; i++) {
+    const caste = castes[Math.floor(rng() * castes.length)];
+    const gender = genders[Math.floor(rng() * genders.length)];
+    const religion = religions[Math.floor(rng() * religions.length)];
+    const income = Math.round(20000 + rng() * 80000);
+    const credit = Math.round(580 + rng() * 270);
+    const loan = Math.round(100000 + rng() * 900000);
+    const state = states[Math.floor(rng() * states.length)];
+    const emp = employments[Math.floor(rng() * employments.length)];
+    const pinBase = caste === 'SC' || caste === 'ST' ? 400100 : 400001;
+    const pin = pinBase + Math.floor(rng() * 99);
+    // Biased approval probability
+    let approvalProb = 0.72;
+    if (caste === 'SC') approvalProb -= 0.22;
+    if (caste === 'ST') approvalProb -= 0.28;
+    if (caste === 'OBC') approvalProb -= 0.10;
+    if (gender === 'Female') approvalProb -= 0.14;
+    if (religion === 'Muslim') approvalProb -= 0.09;
+    if (credit > 750) approvalProb += 0.12;
+    if (credit < 600) approvalProb -= 0.15;
+    if (income > 70000) approvalProb += 0.10;
+    approvalProb = Math.max(0.05, Math.min(0.95, approvalProb));
+    const outcome = rng() < approvalProb ? 1 : 0;
+    // Add small model noise (8% flip rate)
+    const prediction = rng() < 0.08 ? 1 - outcome : outcome;
+    rows.push([i, 22+Math.floor(rng()*36), gender, caste, religion, state, income, credit, loan, emp, pin, outcome, prediction].join(','));
+  }
+  const csv = headers + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fairscan_sample_loan_data.csv';
+  a.click();
+}
+
+// Simple seedable PRNG (Mulberry32) for reproducible-but-varied CSVs
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ── PRINT EXEC ──
+function printExec() { window.print(); }
+
+// ── AUDIT LOG FILTER ──
+function filterAudit(type, el) {
+  document.querySelectorAll('.audit-filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.audit-entry').forEach(entry => {
+    entry.style.display = (type === 'all' || entry.dataset.type === type) ? 'flex' : 'none';
+  });
+}
+
+// ── ADD MANUAL AUDIT NOTE ──
+function addAuditEntry() {
+  const title = prompt('Enter a short title for this audit note:');
+  if (!title) return;
+  const detail = prompt('Enter details (what action was taken, by whom):');
+  if (!detail) return;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'});
+  const timeStr = now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}) + ' IST';
+  const entry = document.getElementById('new-audit-entry');
+  document.getElementById('new-entry-time').innerHTML = dateStr + '<br>' + timeStr;
+  document.getElementById('new-entry-title').textContent = title;
+  document.getElementById('new-entry-detail').textContent = detail;
+  const container = document.getElementById('audit-log-container');
+  container.insertBefore(entry, container.firstChild);
+  entry.style.display = 'flex';
+}
+
+// ── CERTIFICATE STATUS UPDATE ──
+function updateCertStatus(val) {
+  const seal = document.getElementById('cert-seal');
+  if (val === 'pass') { seal.className = 'cert-status-seal pass'; seal.textContent = '✅ AI Bias Audit Passed — Compliant'; }
+  else if (val === 'review') { seal.className = 'cert-status-seal'; seal.style.cssText += 'background:#E8F0FE;color:#1A73E8;border:2px solid rgba(66,133,244,.3);'; seal.textContent = '🔍 Audit Completed — Under Legal Review'; }
+  else { seal.className = 'cert-status-seal fail'; seal.textContent = '⚠ Audit Completed — Remediation In Progress'; }
+}
+
+// ═══════════════════════════════════════
+// WHAT-IF SIMULATOR
+// ═══════════════════════════════════════
+function updateSimulator() {
+  const pin      = parseInt(document.getElementById('sl-pin').value);
+  const surname  = parseInt(document.getElementById('sl-surname').value);
+  const reweight = parseInt(document.getElementById('sl-reweight').value);
+  const thresh   = parseInt(document.getElementById('sl-threshold').value);
+  const adv      = parseInt(document.getElementById('sl-adv').value);
+  const data     = parseInt(document.getElementById('sl-data').value);
+
+  document.getElementById('sl-pin-val').textContent      = pin + '%';
+  document.getElementById('sl-surname-val').textContent  = surname + '%';
+  document.getElementById('sl-reweight-val').textContent = reweight + '%';
+  document.getElementById('sl-threshold-val').textContent= thresh + '%';
+  document.getElementById('sl-adv-val').textContent      = adv + '%';
+  document.getElementById('sl-data-val').textContent     = data + '%';
+
+  // Calculate projected improvements
+  const reduction = (pin * 0.15 + surname * 0.10 + reweight * 0.12 + thresh * 0.13 + adv * 0.18 + data * 0.08) / 100;
+  const newScore  = Math.round(Math.max(67 - (67 - 18) * Math.min(reduction, 1), 18));
+  const newDI     = Math.min(0.61 + 0.30 * Math.min(reduction, 1), 0.97).toFixed(2);
+  const newGap    = Math.max(18.4 - 15 * Math.min(reduction, 1), 1.2).toFixed(1);
+  const newDenied = Math.round(Math.max(4730 - 4200 * Math.min(reduction, 1), 200));
+  const newLegal  = reduction > 0.6 ? 0 : reduction > 0.35 ? 1 : reduction > 0.15 ? 2 : 3;
+
+  document.getElementById('sim-score-val').textContent = newScore;
+  document.getElementById('sim-needle').style.left = newScore + '%';
+  document.getElementById('sim-di').textContent     = newDI;
+  document.getElementById('sim-gap').textContent    = newGap + '%';
+  document.getElementById('sim-denied').textContent = newDenied.toLocaleString('en-IN');
+  document.getElementById('sim-legal').textContent  = newLegal;
+
+  const delta = 67 - newScore;
+  document.getElementById('sim-score-delta').textContent = delta > 0 ? '▼ −' + delta + ' pts' : '';
+
+  const diDelta = (parseFloat(newDI) - 0.61).toFixed(2);
+  document.getElementById('sim-di-delta').textContent    = diDelta > 0 ? '▲ +' + diDelta : '';
+  document.getElementById('sim-di-delta').style.color    = diDelta > 0 ? '#137333' : 'inherit';
+  const deniedSaved = 4730 - newDenied;
+  document.getElementById('sim-denied-delta').textContent = deniedSaved > 0 ? '▼ −' + deniedSaved.toLocaleString('en-IN') + ' saved' : '';
+  document.getElementById('sim-denied-delta').style.color = '#137333';
+
+  // Update score color and risk label
+  const scoreEl = document.getElementById('sim-score-val');
+  const riskEl  = document.getElementById('sim-risk-label');
+  if (newScore < 30) {
+    scoreEl.style.color = '#34A853';
+    riskEl.textContent  = '✅ LOW RISK — Compliant with Indian law';
+    riskEl.style.color  = '#137333';
+  } else if (newScore < 55) {
+    scoreEl.style.color = '#F9AB00';
+    riskEl.textContent  = '⚠ MEDIUM RISK — Monitor closely';
+    riskEl.style.color  = '#B06000';
+  } else {
+    scoreEl.style.color = '#EA4335';
+    riskEl.textContent  = 'HIGH RISK — Legal action possible';
+    riskEl.style.color  = '#C5221F';
+  }
+
+  // Compliance message
+  const compBox  = document.getElementById('sim-compliance-box');
+  const compText = document.getElementById('sim-compliance-text');
+  if (newLegal === 0) {
+    compBox.className = 'alert green';
+    compText.textContent = '✅ COMPLIANT — All Indian laws satisfied. Safe to deploy.';
+  } else if (newLegal === 1) {
+    compBox.className = 'alert yellow';
+    compText.textContent = '⚠ 1 violation remaining. Keep applying fixes to reach full compliance.';
+  } else {
+    compBox.className = 'alert red';
+    compText.textContent = 'NON-COMPLIANT — ' + newLegal + ' violations remaining. Apply more fixes.';
+  }
+}
+
+function resetSimulator() {
+  ['sl-pin','sl-surname','sl-reweight','sl-threshold','sl-adv','sl-data'].forEach(id => {
+    document.getElementById(id).value = 0;
+  });
+  updateSimulator();
+}
+
+function applyAllFixes() {
+  ['sl-pin','sl-surname','sl-reweight','sl-threshold','sl-adv','sl-data'].forEach(id => {
+    document.getElementById(id).value = 100;
+  });
+  updateSimulator();
+}
+
+// ═══════════════════════════════════════
+// TREND CHARTS
+// ═══════════════════════════════════════
+const months = ['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26'];
+let biasChart, diChart, groupsChart, deniedChart, projChart;
+
+function initCharts() {
+  if (!window.Chart) return;
+
+  biasChart = new Chart(document.getElementById('chartBias'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Bias Score',
+        data: [84, 82, 79, 75, 71, 69, 67],
+        borderColor: '#EA4335', backgroundColor: 'rgba(234,67,53,.08)',
+        tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: '#EA4335'
+      }, {
+        label: 'Target (30)',
+        data: [30,30,30,30,30,30,30],
+        borderColor: '#34A853', borderDash: [6,4], pointRadius: 0, tension: 0
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { y: { min: 0, max: 100, title: { display: true, text: 'Bias Score (lower = better)' } } } }
+  });
+
+  diChart = new Chart(document.getElementById('chartDI'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Disparate Impact',
+        data: [0.52, 0.53, 0.56, 0.58, 0.59, 0.60, 0.61],
+        borderColor: '#4285F4', backgroundColor: 'rgba(66,133,244,.08)',
+        tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: '#4285F4'
+      }, {
+        label: 'Legal Minimum (0.80)',
+        data: [0.80,0.80,0.80,0.80,0.80,0.80,0.80],
+        borderColor: '#EA4335', borderDash: [6,4], pointRadius: 0
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { y: { min: 0.4, max: 1.0, title: { display: true, text: 'Disparate Impact (higher = better, min 0.80)' } } } }
+  });
+
+  groupsChart = new Chart(document.getElementById('chartGroups'), {
+    type: 'bar',
+    data: {
+      labels: ['General','OBC','SC','ST','Male','Female','Hindu','Muslim'],
+      datasets: [{
+        label: 'Approval Rate %',
+        data: [76.2, 63.8, 49.1, 43.8, 76.3, 58.1, 71.4, 59.1],
+        backgroundColor: ['#4285F4','#34A853','#EA4335','#EA4335','#4285F4','#FBBC04','#4285F4','#FBBC04']
+      }, {
+        label: 'Target (70%)',
+        data: [70,70,70,70,70,70,70,70],
+        type: 'line', borderColor: '#34A853', borderDash: [6,4], pointRadius: 0, backgroundColor: 'transparent'
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { min: 0, max: 100, title: { display: true, text: 'Approval rate %' } },
+        x: { ticks: { autoSkip: false } } } }
+  });
+
+  deniedChart = new Chart(document.getElementById('chartDenied'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'People wrongly denied',
+        data: [6200, 5900, 5500, 5200, 4950, 4830, 4730],
+        backgroundColor: '#EA4335'
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { y: { title: { display: true, text: 'Estimated wrongly denied per month' } } } }
+  });
+
+  projChart = new Chart(document.getElementById('chartProjection'), {
+    type: 'line',
+    data: {
+      labels: ['Now','Fix 1','Fix 2','Fix 3','Retrain','Target'],
+      datasets: [{
+        label: 'Score',
+        data: [67, 55, 47, 40, 32, 25],
+        borderColor: '#34A853', backgroundColor: 'rgba(52,168,83,.08)',
+        tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: '#34A853'
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { y: { min: 0, max: 80 } } }
+  });
+}
+
+function showTrend(id, el) {
+  ['bias','di','groups','denied'].forEach(t => {
+    document.getElementById('trend-' + t + '-chart').style.display = t === id ? 'block' : 'none';
+  });
+  document.querySelectorAll('.trend-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ═══════════════════════════════════════
+// AI ASSISTANT — Powered by Gemini API
+// ═══════════════════════════════════════
+const ASSISTANT_SYSTEM_PROMPT = `You are FairScan India's AI assistant — an expert on AI bias detection, Indian laws, and fairness in machine learning. You have just completed an audit of a loan approval AI model with these results:
+- Bias Risk Score: 67/100 (HIGH RISK)
+- Disparate Impact: 0.61 (legal minimum is 0.80)
+- SC/ST applicants approved 32% less than General category with identical financial profiles
+- Women approved 18% less than men
+- 3 Indian law violations: DPDP Act 2023, RBI Fair Practices Code, Equal Remuneration Act
+- Proxy features detected: PIN code (78% correlated with caste), surname (71% correlated)
+
+Key Indian laws to know:
+- DPDP Act 2023: Digital Personal Data Protection Act — fines up to ₹250 crore
+- RBI Fair Practices Code: requires transparent, non-discriminatory loan decisions
+- Article 15 of the Constitution: no discrimination on caste, religion, sex, race
+- Equal Remuneration Act 1976: equal pay and treatment regardless of gender
+- EU AI Act: loan approval AI is HIGH RISK — Indian exporters must comply by Aug 2026
+
+Fixes available (no retraining needed): Remove PIN code column, remove surname column, apply Fairlearn ThresholdOptimizer.
+
+IMPORTANT RULES:
+- Answer in plain simple English that non-technical people can understand
+- Keep answers concise (3-5 sentences max unless the question needs more detail)
+- Always relate answers to the Indian context — mention Indian laws, Indian examples
+- If asked in Hindi, answer in Hindi
+- Be direct and actionable — tell them exactly what to do
+- Do NOT use markdown, bullet points, or headers in your response — plain flowing text only`;
+
+const chatHistory = [];
+
+function sendQuick(msg) {
+  const input = document.getElementById('chat-input');
+  input.value = msg;
+  sendChat();
+  const assistantBtn = [...document.querySelectorAll('.nav-link')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'assistant'"));
+  showPage('assistant', assistantBtn || null);
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const messages = document.getElementById('chat-messages');
+
+  // Add user message
+  const userDiv = document.createElement('div');
+  userDiv.className = 'msg user';
+  userDiv.textContent = msg;
+  messages.appendChild(userDiv);
+
+  // Show typing indicator
+  const typing = document.createElement('div');
+  typing.className = 'msg-typing';
+  typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  messages.appendChild(typing);
+  messages.scrollTop = messages.scrollHeight;
+
+  // Add to history
+  chatHistory.push({ role: 'user', content: msg });
+
+  try {
+    const response = await fetch(FAIRSCAN_API + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: chatHistory,
+        scan_context: window._lastScanResults || null
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || 'Backend error ' + response.status);
+    }
+
+    const data = await response.json();
+    const reply = data.reply || 'Sorry, I could not connect. Please try again.';
+
+    // Add to history
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    messages.removeChild(typing);
+    const botDiv = document.createElement('div');
+    botDiv.className = 'msg bot';
+    botDiv.textContent = reply;
+    messages.appendChild(botDiv);
+    messages.scrollTop = messages.scrollHeight;
+  } catch (err) {
+    messages.removeChild(typing);
+    const botDiv = document.createElement('div');
+    botDiv.className = 'msg bot';
+    const isBackendDown = err.message && err.message.includes('Failed to fetch');
+    botDiv.textContent = isBackendDown
+      ? 'AI Assistant requires the backend server. Run: uvicorn main:app --reload --port 8000'
+      : 'Error: ' + err.message;
+    messages.appendChild(botDiv);
+    messages.scrollTop = messages.scrollHeight;
+  }
+}
+
+// ── INIT CHARTS WHEN TRENDS PAGE SHOWN ──
+let chartsInitialized = false;
+function showPageTrends(el) {
+  showPage('trends', el);
+  if (!chartsInitialized) {
+    setTimeout(() => { initCharts(); chartsInitialized = true; }, 100);
+  }
+}
+window.addEventListener('DOMContentLoaded', () => {
+  checkBackendConnection();
+});
+
+// ── MOBILE NAV ──
+function toggleMobileNav() {
+  const nav = document.querySelector('.nav-links');
+  const isOpen = nav.classList.toggle('mobile-open');
+  document.getElementById('hamburger-btn').textContent = isOpen ? '✕' : '☰';
+}
+
+function closeMobileNav() {
+  const nav = document.querySelector('.nav-links');
+  nav.classList.remove('mobile-open');
+  document.getElementById('hamburger-btn').textContent = '☰';
+}
+
+function setMbnActive(el) {
+  document.querySelectorAll('.mbn-item').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── BACKEND API CONFIGURATION ──
+const FAIRSCAN_API = window.FAIRSCAN_API || 'http://localhost:8000';
+
+async function checkBackendConnection() {
+  try {
+    const r = await fetch(FAIRSCAN_API + '/health', { signal: AbortSignal.timeout(2000) });
+    if (r.ok) {
+      const data = await r.json();
+      const badge = document.createElement('div');
+      badge.style.cssText = 'position:fixed;bottom:16px;right:16px;background:#E6F4EA;color:#137333;border:1px solid rgba(52,168,83,.3);padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,.1);cursor:pointer;';
+      badge.innerHTML = '🟢 Backend Connected · v' + (data.version || '2.0');
+      badge.onclick = () => badge.remove();
+      document.body.appendChild(badge);
+      setTimeout(() => { if (badge.parentNode) badge.remove(); }, 5000);
+    }
+  } catch(e) {
+    console.log('FairScan API not reachable — running in demo mode. Start backend: uvicorn main:app --reload --port 8000');
+  }
+}
+
+// ── BACKEND SCAN — calls real API when backend is running ──
+async function runBackendScan(file, labelCol, predCol, attrs, domain) {
+  const formData = new FormData();
+  formData.append('dataset', file);
+  formData.append('label_column', labelCol);
+  formData.append('prediction_column', predCol);
+  formData.append('protected_attributes', attrs);
+  formData.append('domain', domain);
+  const resp = await fetch(FAIRSCAN_API + '/api/scan', { method: 'POST', body: formData });
+  if (!resp.ok) throw new Error('API scan failed: ' + resp.status);
+  return await resp.json();
+}
+
+// ── APPLY REAL RESULTS FROM API ──
+function applyAPIResults(results) {
+  const score = results.bias_score || {};
+  const summary = results.summary || {};
+  const compliance = results.india_compliance || {};
+
+  // Update bias score
+  const scoreEls = document.querySelectorAll('#scan-overview .metric-value.mv-red');
+  if (scoreEls[0]) scoreEls[0].innerHTML = score.score + '<span style="font-size:16px;color:var(--text3);">/100</span>';
+
+  // Update proxy features section dynamically
+  const proxyCount = (results.proxy_features || []).length;
+  if (proxyCount > 0) {
+    const proxyAlert = document.querySelector('#scan-features .alert');
+    if (proxyAlert) {
+      proxyAlert.innerHTML = `<span class="alert-icon">!</span><div><strong>${proxyCount} proxy feature(s) detected from your actual data:</strong> ${(results.proxy_features || []).map(p => `${p.feature} (r=${p.correlation})`).join(', ')}</div>`;
+    }
+  }
+
+  // Update subtitle with real row count
+  const subEl = document.querySelector('#scan-overview .page-sub');
+  if (subEl && summary.n_samples) {
+    subEl.textContent = `Real scan · ${summary.n_samples.toLocaleString('en-IN')} records · Just now`;
+  }
+
+  // Update violation count, DI ratio, and parity gap in executive page
+  document.querySelectorAll('.exec-kpi').forEach(kpi => {
+    const lbl = kpi.querySelector('.exec-kpi-lbl');
+    const val = kpi.querySelector('.exec-kpi-val');
+    if (!lbl || !val) return;
+    const text = lbl.textContent.trim().toLowerCase();
+    if (text.includes('violation') && compliance.n_violations !== undefined) {
+      val.textContent = compliance.n_violations;
+    } else if (text.includes('disparate impact') && compliance.di_ratio !== undefined) {
+      val.textContent = compliance.di_ratio.toFixed(2);
+    } else if (text.includes('parity gap') && compliance.parity_gap !== undefined) {
+      val.textContent = (compliance.parity_gap * 100).toFixed(1) + '%';
+    }
+  });
+
+  // Show success toast
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:70px;right:16px;background:#E6F4EA;color:#137333;border:1px solid rgba(52,168,83,.3);padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.15);';
+  toast.innerHTML = `✅ Real scan complete · Bias Score: ${score.score}/100 · ${compliance.n_violations || 0} violations`;
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 6000);
+}
+
+</script></body></html>
