@@ -251,9 +251,7 @@ body{background:var(--gray50);color:var(--text);font-family:var(--sans);min-heig
 .big-score{font-family:var(--display);font-size:64px;font-weight:700;line-height:1;letter-spacing:-2px;}
 
 /* ── LANGUAGE TOGGLE ── */
-.lang-toggle{display:flex;gap:6px;align-items:center;}
-.lang-btn{padding:5px 12px;border-radius:14px;border:1px solid var(--border);font-size:12px;cursor:pointer;background:white;font-family:var(--sans);}
-.lang-btn.active{background:var(--g-blue);color:white;border-color:var(--g-blue);}
+
 
 /* ── PLAIN ENGLISH BOX ── */
 .plain-box{background:linear-gradient(135deg,var(--g-blue-light),var(--g-green-light));border:1px solid rgba(66,133,244,.2);border-radius:var(--radius);padding:16px;margin-top:12px;}
@@ -461,17 +459,14 @@ body{background:var(--gray50);color:var(--text);font-family:var(--sans);min-heig
     <button class="nav-link" onclick="showPage('simulator',this)">🎮 What-If</button>
     <button class="nav-link" onclick="showPageTrends(this)">📈 Trends</button>
     <button class="nav-link" onclick="showPage('assistant',this)">🤖 AI Assistant</button>
+    <button class="nav-link" onclick="showPage('docscan',this)">📄 Doc Scanner</button>
+    <button class="nav-link" onclick="showPage('interviewcheck',this)">🎙️ Interview Check</button>
     <button class="nav-link" onclick="showPage('laws',this)">India Laws</button>
     <button class="nav-link" onclick="showPage('cases',this)">Case Studies</button>
     <button class="nav-link" onclick="showPage('executive',this)">📋 Executive</button>
-    <button class="nav-link" onclick="showPage('auditlog',this)">🗂 Audit Log</button>
     <button class="nav-link" onclick="showPage('certificate',this)">🏅 Certificate</button>
   </div>
   <div style="display:flex;align-items:center;gap:12px;">
-    <div class="lang-toggle">
-      <button class="lang-btn active" onclick="setLang('en',this)">EN</button>
-      <button class="lang-btn" onclick="setLang('hi',this)">हिं</button>
-    </div>
     <button class="nav-cta" onclick="showPage('scan', document.querySelector('.nav-link:nth-child(2)'))">Start Free Scan</button>
     <button class="hamburger" onclick="toggleMobileNav()" style="display:none;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:18px;" aria-label="Menu" id="hamburger-btn">☰</button>
   </div>
@@ -541,14 +536,20 @@ body{background:var(--gray50);color:var(--text);font-family:var(--sans);min-heig
     <div class="si-icon" style="background:var(--g-blue);color:white;">🤖</div>
     <span>AI Assistant</span>
   </button>
+  <button class="sidebar-item" onclick="showPage('docscan',null);this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));this.classList.add('active');">
+    <div class="si-icon" style="background:var(--g-blue);color:white;">📄</div>
+    <span>Doc Scanner</span>
+    <span class="si-badge" style="background:var(--g-blue);">NEW</span>
+  </button>
+  <button class="sidebar-item" onclick="showPage('interviewcheck',null);this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));this.classList.add('active');">
+    <div class="si-icon" style="background:var(--g-green);color:white;">🎙️</div>
+    <span>Interview Check</span>
+    <span class="si-badge" style="background:var(--g-green);">NEW</span>
+  </button>
   <div class="sidebar-section">Corporate Compliance</div>
   <button class="sidebar-item" onclick="showPage('executive', document.querySelectorAll('.nav-link')[7]); this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active')); this.classList.add('active');">
     <div class="si-icon" style="background:var(--g-blue);color:white;">📋</div>
     <span>Executive Summary</span>
-  </button>
-  <button class="sidebar-item" onclick="showPage('auditlog', document.querySelectorAll('.nav-link')[8]); this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active')); this.classList.add('active');">
-    <div class="si-icon" style="background:var(--g-yellow);color:white;">🗂</div>
-    <span>Audit Trail Log</span>
   </button>
   <button class="sidebar-item" onclick="showPage('certificate', document.querySelectorAll('.nav-link')[9]); this.parentNode.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active')); this.classList.add('active');">
     <div class="si-icon" style="background:var(--g-green);color:white;">🏅</div>
@@ -1312,139 +1313,6 @@ fair_predictions = optimizer.predict(X_test, sensitive_features=df_test['caste']
 <!-- ══════════════════════════════════════════
      AUDIT TRAIL LOG PAGE
 ══════════════════════════════════════════ -->
-<div id="page-auditlog" class="page">
-  <div class="color-stripe"></div>
-  <div class="header-row" style="margin-bottom:20px;">
-    <div>
-      <div class="page-title">Audit Trail Log</div>
-      <div class="page-sub">Complete timestamped record of all bias scans, findings, and actions taken</div>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-outline" onclick="exportReport()">⬇ Export Log</button>
-      <button class="btn btn-blue" onclick="addAuditEntry()">+ Add Manual Note</button>
-    </div>
-  </div>
-
-  <!-- STATS ROW -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">
-    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-blue);"></div><div class="metric-label">Total Scans Run</div><div class="metric-value mv-blue">7</div><div class="metric-sub">Since Jan 2026</div></div>
-    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-red);"></div><div class="metric-label">Critical Issues Found</div><div class="metric-value mv-red">11</div><div class="metric-sub">Across all scans</div></div>
-    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-green);"></div><div class="metric-label">Issues Resolved</div><div class="metric-value mv-green">5</div><div class="metric-sub">45% resolution rate</div></div>
-    <div class="metric-card"><div class="metric-top-bar" style="background:var(--g-yellow);"></div><div class="metric-label">Avg Bias Score</div><div class="metric-value mv-yellow">71</div><div class="metric-sub">Trend: improving</div></div>
-  </div>
-
-  <!-- FILTER BUTTONS -->
-  <div class="audit-filters">
-    <button class="audit-filter-btn active" onclick="filterAudit('all',this)">All Events</button>
-    <button class="audit-filter-btn" onclick="filterAudit('scan',this)">🔍 Scans</button>
-    <button class="audit-filter-btn" onclick="filterAudit('finding',this)">⚠ Findings</button>
-    <button class="audit-filter-btn" onclick="filterAudit('action',this)">✅ Actions Taken</button>
-    <button class="audit-filter-btn" onclick="filterAudit('legal',this)">⚖ Legal / Compliance</button>
-  </div>
-
-  <!-- TIMELINE LOG -->
-  <div class="card" id="audit-log-container">
-    <div class="audit-entry" data-type="scan">
-      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-blue);"></div><div class="audit-line"></div></div>
-      <div class="audit-time">02 Apr 2026<br>14:32 IST</div>
-      <div class="audit-content">
-        <div class="audit-title">Full Bias Scan Completed — Loan Approval Model v2.4</div>
-        <div class="audit-detail">48,230 records scanned. 8 fairness tests run. Bias score: 67/100 (HIGH RISK). 3 critical violations, 2 warnings detected. Scan duration: 4 min 12 sec. Run by: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d8bbb7b5a8b4b1b9b6bbbd98bbb7b5a8b9b6a1f6bbb7b5">[email&#160;protected]</a></div>
-        <div class="audit-tags">
-          <span class="audit-tag badge red">Score: 67/100</span>
-          <span class="audit-tag badge blue">48,230 records</span>
-          <span class="audit-tag badge red">3 violations</span>
-        </div>
-      </div>
-    </div>
-    <div class="audit-entry" data-type="finding">
-      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-red);"></div><div class="audit-line"></div></div>
-      <div class="audit-time">02 Apr 2026<br>14:33 IST</div>
-      <div class="audit-content">
-        <div class="audit-title">Critical Finding: Caste Bias — SC/ST Disparate Impact 0.57</div>
-        <div class="audit-detail">ST applicants approved at 43.8% vs General 76.2%. Disparate Impact ratio 0.57 — below the 0.80 legal threshold. Violates DPDP Act 2023 and RBI Fair Practices Code. 2,760 SC/ST applicants may have been wrongly denied in the past 90 days.</div>
-        <div class="audit-tags">
-          <span class="audit-tag badge red">DPDP Violation</span>
-          <span class="audit-tag badge red">RBI Code Violation</span>
-          <span class="audit-tag badge red">Critical</span>
-        </div>
-      </div>
-    </div>
-    <div class="audit-entry" data-type="finding">
-      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-red);"></div><div class="audit-line"></div></div>
-      <div class="audit-time">02 Apr 2026<br>14:33 IST</div>
-      <div class="audit-content">
-        <div class="audit-title">Critical Finding: PIN Code Used as Caste Proxy (r = 0.78)</div>
-        <div class="audit-detail">Feature audit detected PIN code has 0.78 Pearson correlation with caste category. Model is using geographic location as an indirect discriminator. Surname field shows 0.71 correlation with caste/religion. Both recommended for immediate removal.</div>
-        <div class="audit-tags">
-          <span class="audit-tag badge red">Proxy Feature</span>
-          <span class="audit-tag badge yellow">PIN Code</span>
-          <span class="audit-tag badge yellow">Surname</span>
-        </div>
-      </div>
-    </div>
-    <div class="audit-entry" data-type="legal">
-      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-yellow);"></div><div class="audit-line"></div></div>
-      <div class="audit-time">02 Apr 2026<br>15:10 IST</div>
-      <div class="audit-content">
-        <div class="audit-title">Legal Review Triggered — Report shared with Legal Team</div>
-        <div class="audit-detail">Audit findings shared with <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="85e9e0e2e4e9c5e6eae8f5e4ebfcabe6eae8">[email&#160;protected]</a> and <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="62010d0f120e0b030c010722010d0f12030c1b4c010d0f">[email&#160;protected]</a>. Legal team to review DPDP Act liability exposure. Counsel advised to document all remediation steps taken as evidence of good-faith compliance effort.</div>
-        <div class="audit-tags">
-          <span class="audit-tag badge yellow">Legal Review</span>
-          <span class="audit-tag badge blue">In Progress</span>
-        </div>
-      </div>
-    </div>
-    <div class="audit-entry" data-type="action">
-      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-green);"></div><div class="audit-line"></div></div>
-      <div class="audit-time">15 Mar 2026<br>11:20 IST</div>
-      <div class="audit-content">
-        <div class="audit-title">Action Taken: Gender Bias Threshold Fix Applied</div>
-        <div class="audit-detail">ThresholdOptimizer applied for gender attribute. Women's approval rate improved from 51.2% to 58.1%. Gender parity gap reduced from 25.1% to 18.2%. Further improvement pending full retraining. Applied by: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="46272f2936350625292b3627283f6825292b">[email&#160;protected]</a></div>
-        <div class="audit-tags">
-          <span class="audit-tag badge green">Partially Fixed</span>
-          <span class="audit-tag badge green">Gender</span>
-        </div>
-      </div>
-    </div>
-    <div class="audit-entry" data-type="scan">
-      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-blue);"></div><div class="audit-line"></div></div>
-      <div class="audit-time">01 Feb 2026<br>09:45 IST</div>
-      <div class="audit-content">
-        <div class="audit-title">Full Bias Scan Completed — Loan Approval Model v2.3</div>
-        <div class="audit-detail">45,800 records scanned. Bias score: 78/100. 4 critical violations detected. Caste bias worse than current version — improvements confirmed in v2.4. Run by: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e480859085c990818589a4878b8994858a9dca878b89">[email&#160;protected]</a></div>
-        <div class="audit-tags">
-          <span class="audit-tag badge red">Score: 78/100</span>
-          <span class="audit-tag badge blue">v2.3</span>
-        </div>
-      </div>
-    </div>
-    <div class="audit-entry" data-type="action">
-      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-green);"></div><div class="audit-line"></div></div>
-      <div class="audit-time">10 Jan 2026<br>16:00 IST</div>
-      <div class="audit-content">
-        <div class="audit-title">Action Taken: AI Ethics Policy v1.0 Adopted by Board</div>
-        <div class="audit-detail">Board resolution passed requiring mandatory FairScan audit before any AI model deployment. Quarterly re-audits mandated. AI Ethics Committee formed with 5 members. Policy document filed with company secretary.</div>
-        <div class="audit-tags">
-          <span class="audit-tag badge green">Policy Adopted</span>
-          <span class="audit-tag badge green">Board Resolution</span>
-        </div>
-      </div>
-    </div>
-    <!-- NEW ENTRY PLACEHOLDER -->
-    <div id="new-audit-entry" style="display:none;" class="audit-entry" data-type="action">
-      <div class="audit-timeline"><div class="audit-dot" style="background:var(--g-blue);"></div></div>
-      <div class="audit-time" id="new-entry-time"></div>
-      <div class="audit-content">
-        <div class="audit-title" id="new-entry-title"></div>
-        <div class="audit-detail" id="new-entry-detail"></div>
-        <div class="audit-tags"><span class="audit-tag badge blue">Manual Note</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
 <!-- ══════════════════════════════════════════
      COMPLIANCE CERTIFICATE PAGE
 ══════════════════════════════════════════ -->
@@ -1659,8 +1527,14 @@ fair_predictions = optimizer.predict(X_test, sensitive_features=df_test['caste']
 <div id="page-assistant" class="page">
   <div class="color-stripe"></div>
   <div class="page-header">
-    <div class="page-title">🤖 FairScan AI Assistant</div>
-    <div class="page-sub">Ask anything about your bias results, Indian laws, or how to fix issues — plain English answers, always</div>
+    <div class="page-title">🤖 FairScan AI Assistant </div>
+    <div class="page-sub">Ask anything about your bias results, Indian laws, or how to fix issues — plain English answers backed by FairScan's Indian legal knowledge base</div>
+  </div>
+  <div style="background:#FEF7E0;border:1px solid rgba(251,188,4,.4);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:14px;font-weight:600;color:#B06000;">🔑 Gemma 4 API Key</span>
+    <input id="gemma-key-input" type="password" placeholder="Paste your Google AI Studio key here (free at aistudio.google.com)" style="flex:1;min-width:260px;padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--sans);" oninput="setGemmaKey(this.value)"/>
+    <button onclick="setGemmaKey(document.getElementById('gemma-key-input').value);this.textContent='✅ Saved!';setTimeout(()=>this.textContent='Save Key',1500)" style="padding:8px 16px;background:#4285F4;color:white;border:none;border-radius:8px;font-size:13px;font-family:var(--sans);font-weight:500;cursor:pointer;">Save Key</button>
+    <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:12px;color:#1A73E8;text-decoration:none;white-space:nowrap;">Get free key →</a>
   </div>
   <div class="two-col">
     <div>
@@ -1709,11 +1583,291 @@ fair_predictions = optimizer.predict(X_test, sensitive_features=df_test['caste']
   </div>
 </div>
 
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: DOCUMENT BIAS SCANNER -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="page-docscan" class="page">
+  <div class="color-stripe"></div>
+  <div class="page-header">
+    <div class="page-title">📄 Document Bias Scanner <span style="font-size:13px;background:#E8F0FE;color:#1A73E8;padding:3px 10px;border-radius:12px;font-weight:500;margin-left:8px;">FairScan Scoring Engine</span></div>
+    <div class="page-sub">Upload a job posting, loan policy, or HR document — FairScan extracts structured bias signals, maps them to a standardised 0–100 Bias Risk Score, and flags the exact Indian law violated</div>
+  </div>
+
+  <div style="background:#FEF7E0;border:1px solid rgba(251,188,4,.4);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:14px;font-weight:600;color:#B06000;">🔑 Gemma 4 API Key Required</span>
+    <input id="docscan-key-input" type="password" placeholder="Paste your Google AI Studio key (free at aistudio.google.com)" style="flex:1;min-width:260px;padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--sans);" oninput="setGemmaKey(this.value);document.getElementById('gemma-key-input').value=this.value;"/>
+    <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:12px;color:#1A73E8;text-decoration:none;">Get free key →</a>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title" style="margin-bottom:4px;">📂 Upload or Paste Document</div>
+        <div class="card-sub" style="margin-bottom:16px;">Works with job postings, loan policy PDFs, HR guidelines, admission criteria, healthcare eligibility documents</div>
+
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <button id="docmode-paste" onclick="switchDocMode('paste')" style="flex:1;padding:10px;border:2px solid var(--g-blue);border-radius:10px;background:var(--g-blue-light);color:var(--g-blue);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;">✏️ Paste Text</button>
+          <button id="docmode-file" onclick="switchDocMode('file')" style="flex:1;padding:10px;border:2px solid var(--border);border-radius:10px;background:white;color:var(--text2);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;">📎 Upload File</button>
+        </div>
+
+        <div id="docmode-paste-area">
+          <textarea id="doc-text-input" placeholder="Paste your job posting, loan policy, or HR document text here...
+
+Example: 
+'We are looking for a young, energetic candidate. Fluent Hindi speakers preferred. Male candidates may be preferred for field roles. Clean family background required.'" style="width:100%;height:200px;padding:14px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:var(--sans);line-height:1.6;resize:vertical;color:var(--text);"></textarea>
+        </div>
+
+        <div id="docmode-file-area" style="display:none;">
+          <div class="upload-zone" onclick="document.getElementById('doc-file-input').click()" style="padding:30px;">
+            <div class="upload-icon">📄</div>
+            <div class="upload-title" id="doc-upload-title">Click to upload PDF, TXT, or DOCX</div>
+            <div class="upload-sub">Job postings · Loan policies · HR documents · Admission criteria</div>
+          </div>
+          <input type="file" id="doc-file-input" accept=".txt,.pdf,.doc,.docx" style="display:none" onchange="handleDocFile(this)"/>
+        </div>
+
+        <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <select id="doc-domain-select" style="padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--sans);color:var(--text);background:white;">
+            <option value="hiring">🏢 Job Posting / Hiring</option>
+            <option value="loan">🏦 Loan / Banking Policy</option>
+            <option value="healthcare">🏥 Healthcare Eligibility</option>
+            <option value="education">🎓 Admission / Education</option>
+            <option value="general">📋 General Policy Document</option>
+          </select>
+          <button onclick="scanDocument()" style="flex:1;padding:10px 20px;background:var(--g-blue);color:white;border:none;border-radius:10px;font-size:14px;font-family:var(--sans);font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='#1a73e8'" onmouseout="this.style.background='var(--g-blue)'">🔍 Extract Bias Signals → Score Document</button>
+        </div>
+      </div>
+
+      <div id="docscan-results" style="display:none;">
+        <!-- METRIC CARDS — same visual system as CSV scanner -->
+        <div class="metric-grid" style="margin-bottom:20px;">
+          <div class="metric-card">
+            <div class="metric-top-bar" style="background:var(--g-red);"></div>
+            <div class="metric-label">Bias Risk Score</div>
+            <div class="metric-value mv-red" id="ds-score">—<span style="font-size:16px;color:var(--text3);">/100</span></div>
+            <div class="metric-sub" id="ds-risk-label">Scanning...</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top-bar" style="background:var(--g-blue);"></div>
+            <div class="metric-label">Bias Signals Found</div>
+            <div class="metric-value mv-blue" id="ds-signals">—</div>
+            <div class="metric-sub">Across all categories</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top-bar" style="background:var(--g-yellow);"></div>
+            <div class="metric-label">Laws Violated</div>
+            <div class="metric-value mv-yellow" id="ds-laws">—</div>
+            <div class="metric-sub">Indian legal exposure</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top-bar" style="background:var(--g-green);"></div>
+            <div class="metric-label">Categories Checked</div>
+            <div class="metric-value mv-green">6</div>
+            <div class="metric-sub">Caste·Gender·Religion+</div>
+          </div>
+        </div>
+
+        <!-- CATEGORY SCORE BARS -->
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div class="card-title">📊 Bias Score by Category</div>
+            <div id="docscan-risk-badge" style="padding:4px 14px;border-radius:20px;font-size:13px;font-weight:600;background:var(--g-red-light);color:var(--g-red);">—</div>
+          </div>
+          <div id="ds-category-bars" style="display:flex;flex-direction:column;gap:12px;"></div>
+        </div>
+
+        <!-- PLAIN ENGLISH SUMMARY -->
+        <div class="alert blue" style="margin-bottom:16px;">
+          <span class="alert-icon">📖</span>
+          <div id="ds-summary-text" style="font-size:14px;line-height:1.6;"></div>
+        </div>
+
+        <!-- ALERT CARDS PER FINDING -->
+        <div id="ds-alert-cards" style="margin-bottom:16px;"></div>
+
+        <!-- LEGAL VIOLATIONS -->
+        <div class="card" id="ds-legal-card" style="display:none;margin-bottom:16px;">
+          <div class="card-title" style="margin-bottom:12px;">⚖️ Indian Law Violations</div>
+          <div id="ds-legal-list" style="display:flex;flex-direction:column;gap:8px;font-size:13px;"></div>
+        </div>
+
+        <!-- FAIR REWRITE -->
+        <div class="card" id="ds-rewrite-card" style="display:none;border-left:4px solid var(--g-green);background:var(--g-green-light);">
+          <div class="card-title" style="color:#137333;margin-bottom:10px;">✅ FairScan Compliant Rewrite</div>
+          <div id="ds-rewrite-text" style="font-size:13px;line-height:1.7;color:#1B5E20;white-space:pre-wrap;"></div>
+        </div>
+      </div>
+
+      <div id="docscan-loading" style="display:none;text-align:center;padding:40px;">
+        <div style="font-size:32px;margin-bottom:12px;">🔍</div>
+        <div style="font-size:15px;font-weight:500;color:var(--text);">Extracting bias signals from your document...</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:6px;">Running signals through FairScan scoring engine · Mapping to Indian law violations</div>
+        <div style="margin-top:16px;height:4px;background:var(--gray200);border-radius:4px;overflow:hidden;"><div id="docscan-progress" style="height:100%;background:linear-gradient(90deg,var(--g-blue),var(--g-green));width:0%;transition:width .3s;border-radius:4px;"></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title" style="margin-bottom:4px;">⚙️ How FairScan Scores Documents</div>
+        <div class="card-sub" style="margin-bottom:12px;">Same 0–100 Bias Risk Score as your CSV scanner — applied to unstructured text</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+          <div style="padding:10px 12px;background:var(--g-blue-light);border-radius:8px;color:#1A73E8;"><strong>① Extract:</strong> Bias signals pulled from raw text — caste proxies, gender assumptions, regional language</div>
+          <div style="padding:10px 12px;background:var(--g-blue-light);border-radius:8px;color:#1A73E8;"><strong>② Score:</strong> Signals run through FairScan's bias scoring engine → 0–100 Bias Risk Score</div>
+          <div style="padding:10px 12px;background:var(--g-red-light);border-radius:8px;color:#C5221F;"><strong>③ Map to Law:</strong> Each finding flagged against specific Indian law — DPDP Act, Equal Remuneration Act, Article 15, SC/ST Atrocities Act</div>
+          <div style="padding:10px 12px;background:var(--g-green-light);border-radius:8px;color:#137333;"><strong>④ Dashboard:</strong> Output shown in the same format as CSV scan results — unified compliance view</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px;">📝 Try These Examples</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button onclick="loadExample('hiring')" style="padding:10px 12px;background:var(--gray50);border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;color:var(--text2);line-height:1.5;">🏢 <strong>Biased Job Posting</strong><br>With caste proxies &amp; gender preference</button>
+          <button onclick="loadExample('loan')" style="padding:10px 12px;background:var(--gray50);border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;color:var(--text2);line-height:1.5;">🏦 <strong>Discriminatory Loan Policy</strong><br>With regional &amp; community bias</button>
+          <button onclick="loadExample('clean')" style="padding:10px 12px;background:var(--gray50);border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;color:var(--text2);line-height:1.5;">✅ <strong>Fair Job Posting</strong><br>No bias — to see a clean result</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE: INTERVIEW BIAS CHECKER -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="page-interviewcheck" class="page">
+  <div class="color-stripe"></div>
+  <div class="page-header">
+    <div class="page-title">🎙️ Interview & Hiring Bias Firewall <span style="font-size:13px;background:#E6F4EA;color:#137333;padding:3px 10px;border-radius:12px;font-weight:500;margin-left:8px;">Pre-Send Compliance Gate</span></div>
+    <div class="page-sub">Score hiring text on FairScan's bias rubric before sending — blocks high-risk documents, auto-generates compliant rewrites, and logs everything to the audit trail</div>
+  </div>
+
+  <div style="background:#FEF7E0;border:1px solid rgba(251,188,4,.4);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:14px;font-weight:600;color:#B06000;">🔑 Gemma 4 API Key Required</span>
+    <input id="interview-key-input" type="password" placeholder="Same key as AI Assistant — paste your Google AI Studio key" style="flex:1;min-width:260px;padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--sans);" oninput="setGemmaKey(this.value);document.getElementById('gemma-key-input').value=this.value;"/>
+    <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:12px;color:#1A73E8;text-decoration:none;">Get free key →</a>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title" style="margin-bottom:4px;">📝 Paste Interview Feedback or Rejection Note</div>
+        <div class="card-sub" style="margin-bottom:16px;">Works with rejection emails, interviewer notes, performance reviews, hiring decisions, candidate evaluations</div>
+
+        <textarea id="interview-text-input" placeholder="Paste interview feedback, rejection email, or hiring decision note here...
+
+Example:
+'Candidate seemed too traditional for our startup culture. Her accent was a bit unclear. She may not be available for late night calls. Overall, not the right cultural fit for the team.'" style="width:100%;height:200px;padding:14px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:var(--sans);line-height:1.6;resize:vertical;color:var(--text);margin-bottom:16px;"></textarea>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <select id="interview-context-select" style="padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--sans);color:var(--text);background:white;">
+            <option value="rejection">📧 Rejection Email</option>
+            <option value="feedback">📋 Interviewer Feedback</option>
+            <option value="review">📊 Performance Review</option>
+            <option value="decision">⚖️ Hiring Decision Note</option>
+            <option value="reference">🗣️ Reference Check Notes</option>
+          </select>
+          <button onclick="checkInterviewBias()" style="flex:1;padding:10px 20px;background:var(--g-green);color:white;border:none;border-radius:10px;font-size:14px;font-family:var(--sans);font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='#1e8e3e'" onmouseout="this.style.background='var(--g-green)'">🛡️ Score & Gate — Check Before Send</button>
+        </div>
+      </div>
+
+      <div id="interview-results" style="display:none;">
+        <!-- METRIC CARDS -->
+        <div class="metric-grid" style="margin-bottom:20px;">
+          <div class="metric-card">
+            <div class="metric-top-bar" style="background:var(--g-red);"></div>
+            <div class="metric-label">Bias Risk Score</div>
+            <div class="metric-value mv-red" id="iv-score">—<span style="font-size:16px;color:var(--text3);">/100</span></div>
+            <div class="metric-sub" id="iv-risk-label">Scanning...</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top-bar" style="background:var(--g-red);"></div>
+            <div class="metric-label">Biased Phrases</div>
+            <div class="metric-value mv-red" id="iv-phrases">—</div>
+            <div class="metric-sub">Flagged in text</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top-bar" style="background:var(--g-yellow);"></div>
+            <div class="metric-label">Laws at Risk</div>
+            <div class="metric-value mv-yellow" id="iv-laws">—</div>
+            <div class="metric-sub">Legal exposure</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-top-bar" style="background:var(--g-green);"></div>
+            <div class="metric-label">Bias Types</div>
+            <div class="metric-value mv-green" id="iv-types">—</div>
+            <div class="metric-sub">Categories detected</div>
+          </div>
+        </div>
+
+        <!-- CATEGORY SCORE BARS -->
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div class="card-title">📊 Bias Score by Category</div>
+            <div id="interview-risk-badge" style="padding:4px 14px;border-radius:20px;font-size:13px;font-weight:600;background:var(--g-red-light);color:var(--g-red);">—</div>
+          </div>
+          <div id="iv-category-bars" style="display:flex;flex-direction:column;gap:12px;"></div>
+        </div>
+
+        <!-- PLAIN ENGLISH -->
+        <div class="alert blue" style="margin-bottom:16px;">
+          <span class="alert-icon">📖</span>
+          <div id="iv-summary-text" style="font-size:14px;line-height:1.6;">—</div>
+        </div>
+
+        <!-- FLAGGED PHRASES -->
+        <div id="iv-alert-cards" style="margin-bottom:16px;"></div>
+
+        <!-- FAIR REWRITE -->
+        <div class="card" id="iv-rewrite-card" style="display:none;border-left:4px solid var(--g-green);background:var(--g-green-light);">
+          <div class="card-title" style="color:#137333;margin-bottom:10px;">✅ FairScan Compliant Rewrite</div>
+          <div id="iv-rewrite-text" style="font-size:13px;line-height:1.7;color:#1B5E20;white-space:pre-wrap;"></div>
+        </div>
+      </div>
+
+      <div id="interview-loading" style="display:none;text-align:center;padding:40px;">
+        <div style="font-size:32px;margin-bottom:12px;">🛡️</div>
+        <div style="font-size:15px;font-weight:500;color:var(--text);">Running FairScan bias gate...</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:6px;">Scoring on bias rubric · Checking send threshold · Generating compliant rewrite</div>
+        <div style="margin-top:16px;height:4px;background:var(--gray200);border-radius:4px;overflow:hidden;"><div id="interview-progress" style="height:100%;background:linear-gradient(90deg,var(--g-green),var(--g-blue));width:0%;transition:width .3s;border-radius:4px;"></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title" style="margin-bottom:4px;">🛡️ How the Bias Firewall Works</div>
+        <div class="card-sub" style="margin-bottom:12px;">A real-time compliance gate — not just a detector</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+          <div style="padding:10px 12px;background:var(--g-blue-light);border-radius:8px;color:#1A73E8;"><strong>① Score:</strong> Text is scored on FairScan's bias rubric → 0–100 Bias Risk Score (same engine as CSV scanner)</div>
+          <div style="padding:10px 12px;background:var(--g-red-light);border-radius:8px;color:#C5221F;"><strong>② Gate:</strong> Score ≥ 40 = BLOCKED — document flagged as too risky to send as-is</div>
+          <div style="padding:10px 12px;background:var(--g-yellow-light);border-radius:8px;color:#B06000;"><strong>③ Law:</strong> Each flagged phrase mapped to the specific Indian law violated</div>
+          <div style="padding:10px 12px;background:var(--g-green-light);border-radius:8px;color:#137333;"><strong>④ Rewrite:</strong> Auto-generates a compliant version that removes bias while keeping legitimate feedback</div>
+          <div style="padding:10px 12px;background:var(--g-green-light);border-radius:8px;color:#137333;"><strong>⑤ Log:</strong> Every check recorded to the compliance audit trail — DPDP Act ready</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px;">📝 Try These Examples</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button onclick="loadInterviewExample('gender')" style="padding:10px 12px;background:var(--gray50);border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;color:var(--text2);line-height:1.5;">👩 <strong>Gender Biased Rejection</strong><br>Subtle maternity &amp; availability bias</button>
+          <button onclick="loadInterviewExample('caste')" style="padding:10px 12px;background:var(--gray50);border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;color:var(--text2);line-height:1.5;">🏷️ <strong>Cultural Fit Rejection</strong><br>Coded caste &amp; community bias</button>
+          <button onclick="loadInterviewExample('region')" style="padding:10px 12px;background:var(--gray50);border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;color:var(--text2);line-height:1.5;">🗺️ <strong>Regional Accent Bias</strong><br>Northeast/South India discrimination</button>
+          <button onclick="loadInterviewExample('fair')" style="padding:10px 12px;background:var(--gray50);border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;color:var(--text2);line-height:1.5;">✅ <strong>Fair Rejection Email</strong><br>No bias — professional &amp; objective</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;background:var(--g-blue-light);border:1px solid rgba(66,133,244,.2);">
+        <div style="font-size:13px;font-weight:600;color:var(--g-blue);margin-bottom:8px;">💡 Why a Firewall — Not Just a Checker?</div>
+        <div style="font-size:13px;color:#185FA5;line-height:1.6;">Most tools tell you bias exists <em>after</em> a complaint is filed. FairScan's bias firewall intercepts the document <strong>before it reaches the candidate</strong>. A rejection email that violates the Equal Remuneration Act never gets sent — it gets rewritten, logged, and cleared. That's the difference between compliance theatre and actual legal protection.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ── NAVIGATION ──
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2312,15 +2466,7 @@ const translations = {
     heroSub: 'FairScan India आपके AI में छुपे भेदभाव की जांच करता है — जाति, लिंग, धर्म या क्षेत्र के आधार पर — और बताता है कि इसे कैसे ठीक करें। भारत के लिए बनाया गया, भारतीय कानूनों का पालन करते हुए।',
   }
 };
-function setLang(lang, el) {
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  const t = translations[lang];
-  if (document.getElementById('hero-title')) {
-    document.getElementById('hero-title').textContent = t.heroTitle;
-    document.getElementById('hero-sub').textContent = t.heroSub;
-  }
-}
+
 
 // ── EXPORT ──
 function exportReport() {
@@ -2437,31 +2583,10 @@ function mulberry32(seed) {
 function printExec() { window.print(); }
 
 // ── AUDIT LOG FILTER ──
-function filterAudit(type, el) {
-  document.querySelectorAll('.audit-filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('.audit-entry').forEach(entry => {
-    entry.style.display = (type === 'all' || entry.dataset.type === type) ? 'flex' : 'none';
-  });
-}
+
 
 // ── ADD MANUAL AUDIT NOTE ──
-function addAuditEntry() {
-  const title = prompt('Enter a short title for this audit note:');
-  if (!title) return;
-  const detail = prompt('Enter details (what action was taken, by whom):');
-  if (!detail) return;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'});
-  const timeStr = now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}) + ' IST';
-  const entry = document.getElementById('new-audit-entry');
-  document.getElementById('new-entry-time').innerHTML = dateStr + '<br>' + timeStr;
-  document.getElementById('new-entry-title').textContent = title;
-  document.getElementById('new-entry-detail').textContent = detail;
-  const container = document.getElementById('audit-log-container');
-  container.insertBefore(entry, container.firstChild);
-  entry.style.display = 'flex';
-}
+
 
 // ── CERTIFICATE STATUS UPDATE ──
 function updateCertStatus(val) {
@@ -2703,6 +2828,37 @@ function sendQuick(msg) {
   showPage('assistant', assistantBtn || null);
 }
 
+// ── GOOGLE AI API KEY ──
+// Get your free key at https://aistudio.google.com/app/apikey
+let GEMMA_API_KEY = localStorage.getItem('fairscan_gemma_key') || '';
+
+function setGemmaKey(key) {
+  GEMMA_API_KEY = key.trim();
+  localStorage.setItem('fairscan_gemma_key', GEMMA_API_KEY);
+}
+
+async function callGemma4(systemPrompt, userMessage) {
+  if (!GEMMA_API_KEY) {
+    return '⚠️ Please enter your Google AI Studio API key to enable AI responses. Click the "Set API Key" button above, or get a free key at aistudio.google.com.';
+  }
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=${GEMMA_API_KEY}`;
+  const body = {
+    contents: [{ parts: [{ text: systemPrompt + '\n\nUser: ' + userMessage }] }],
+    generationConfig: { temperature: 0.4, maxOutputTokens: 600 }
+  };
+  const resp = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'Gemma API error ' + resp.status);
+  }
+  const data = await resp.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemma 4.';
+}
+
 async function sendChat() {
   const input = document.getElementById('chat-input');
   const msg = input.value.trim();
@@ -2711,57 +2867,40 @@ async function sendChat() {
 
   const messages = document.getElementById('chat-messages');
 
-  // Add user message
   const userDiv = document.createElement('div');
   userDiv.className = 'msg user';
   userDiv.textContent = msg;
   messages.appendChild(userDiv);
 
-  // Show typing indicator
   const typing = document.createElement('div');
   typing.className = 'msg-typing';
   typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
   messages.appendChild(typing);
   messages.scrollTop = messages.scrollHeight;
 
-  // Add to history
   chatHistory.push({ role: 'user', content: msg });
 
   try {
-    const response = await fetch(FAIRSCAN_API + '/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: chatHistory,
-        scan_context: window._lastScanResults || null
-      })
-    });
+    const scanCtx = window._lastScanResults ? 
+      `Current scan results: Bias Score=${window._lastScanResults.score}/100, Disparate Impact=${window._lastScanResults.di}, Parity Gap=${window._lastScanResults.gap}%, SC Approval=${window._lastScanResults.scRate}%, General Approval=${window._lastScanResults.generalRate}%.` : 
+      'No scan results yet — user has not uploaded data.';
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.detail || 'Backend error ' + response.status);
-    }
+    const systemPrompt = `You are FairScan India's AI assistant, powered by Gemma 4. You are an expert in AI bias detection, Indian law (DPDP Act 2023, RBI Fair Practice Code, Equal Remuneration Act, SC/ST Prevention of Atrocities Act), and fairness metrics (Disparate Impact, Demographic Parity, Equal Opportunity). You explain things in simple English and also understand Hindi. Be concise, practical, and always relate answers to the Indian context. ${scanCtx}`;
 
-    const data = await response.json();
-    const reply = data.reply || 'Sorry, I could not connect. Please try again.';
-
-    // Add to history
+    const reply = await callGemma4(systemPrompt, msg);
     chatHistory.push({ role: 'assistant', content: reply });
 
     messages.removeChild(typing);
     const botDiv = document.createElement('div');
     botDiv.className = 'msg bot';
-    botDiv.textContent = reply;
+    botDiv.innerHTML = reply.replace(/\n/g, '<br>');
     messages.appendChild(botDiv);
     messages.scrollTop = messages.scrollHeight;
   } catch (err) {
     messages.removeChild(typing);
     const botDiv = document.createElement('div');
     botDiv.className = 'msg bot';
-    const isBackendDown = err.message && err.message.includes('Failed to fetch');
-    botDiv.textContent = isBackendDown
-      ? 'AI Assistant requires the backend server. Run: uvicorn main:app --reload --port 8000'
-      : 'Error: ' + err.message;
+    botDiv.textContent = '❌ Error: ' + err.message + '. Make sure your Gemma API key is set correctly.';
     messages.appendChild(botDiv);
     messages.scrollTop = messages.scrollHeight;
   }
@@ -2777,6 +2916,13 @@ function showPageTrends(el) {
 }
 window.addEventListener('DOMContentLoaded', () => {
   checkBackendConnection();
+  // Restore saved Gemma API key
+  const savedKey = localStorage.getItem('fairscan_gemma_key');
+  if (savedKey) {
+    GEMMA_API_KEY = savedKey;
+    const inputs = ['gemma-key-input','docscan-key-input','interview-key-input'];
+    inputs.forEach(id => { const el = document.getElementById(id); if(el) el.value = savedKey; });
+  }
 });
 
 // ── MOBILE NAV ──
@@ -2876,6 +3022,363 @@ function applyAPIResults(results) {
   toast.innerHTML = `✅ Real scan complete · Bias Score: ${score.score}/100 · ${compliance.n_violations || 0} violations`;
   document.body.appendChild(toast);
   setTimeout(() => { if (toast.parentNode) toast.remove(); }, 6000);
+}
+
+
+// ══════════════════════════════════════════════
+// DOCUMENT BIAS SCANNER
+// ══════════════════════════════════════════════
+function switchDocMode(mode) {
+  document.getElementById('docmode-paste-area').style.display = mode === 'paste' ? 'block' : 'none';
+  document.getElementById('docmode-file-area').style.display = mode === 'file' ? 'block' : 'none';
+  document.getElementById('docmode-paste').style.border = mode === 'paste' ? '2px solid var(--g-blue)' : '2px solid var(--border)';
+  document.getElementById('docmode-paste').style.background = mode === 'paste' ? 'var(--g-blue-light)' : 'white';
+  document.getElementById('docmode-paste').style.color = mode === 'paste' ? 'var(--g-blue)' : 'var(--text2)';
+  document.getElementById('docmode-file').style.border = mode === 'file' ? '2px solid var(--g-blue)' : '2px solid var(--border)';
+  document.getElementById('docmode-file').style.background = mode === 'file' ? 'var(--g-blue-light)' : 'white';
+  document.getElementById('docmode-file').style.color = mode === 'file' ? 'var(--g-blue)' : 'var(--text2)';
+}
+
+function handleDocFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('doc-upload-title').textContent = '⏳ Reading ' + file.name + '...';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('doc-text-input').value = e.target.result;
+    document.getElementById('doc-upload-title').textContent = '✓ ' + file.name + ' loaded — click Paste Text to review';
+    switchDocMode('paste');
+  };
+  reader.readAsText(file);
+}
+
+const docExamples = {
+  hiring: `Job Opening: Senior Sales Executive
+
+We are looking for a young, dynamic male candidate (25-32 years) for our Delhi NCR team. The ideal candidate should:
+- Be fluent in Hindi (mother tongue preferred)
+- Come from a good family background with strong moral values
+- Be available for late night client calls and weekend travel
+- Have a "go-getter" attitude — we need someone aggressive
+- Be comfortable working in a male-dominated environment
+- Residents of Delhi/NCR only — no Northeast India or Bihar candidates
+- Salary: Based on caste certificate and community recommendations may apply
+
+Note: Female candidates need not apply for field roles.`,
+  loan: `Micro-Finance Loan Policy — Internal Guidelines
+
+Eligibility Criteria:
+- Applicants from scheduled areas (PIN codes 834001-840000) require additional guarantor
+- Surname must match community record for identity verification
+- Applicants whose names appear "non-mainstream" require extra documentation
+- Muslim applicants: additional scrutiny required during Ramadan period
+- Northeast India addresses: higher risk category, reduced loan limits apply
+- Female applicants without male co-signatory not eligible above ₹50,000
+- SC/ST applicants: loan officer discretion required for amounts above ₹1 lakh`,
+  clean: `Software Engineer — Backend (Remote)
+
+We are looking for a Backend Software Engineer to join our team.
+
+Requirements:
+- 3+ years of experience with Python or Java
+- Experience with REST APIs and microservices
+- Strong problem-solving skills
+- Good communication skills (written and verbal)
+- Ability to work independently and in a team
+
+We are an equal opportunity employer. We do not discriminate on the basis of caste, religion, gender, region, age, or disability. All qualified applicants will be considered.
+
+Compensation: ₹18-25 LPA based on experience and skills.`
+};
+
+function loadExample(type) {
+  document.getElementById('doc-text-input').value = docExamples[type] || '';
+  switchDocMode('paste');
+  const domainMap = { hiring: 'hiring', loan: 'loan', clean: 'hiring' };
+  document.getElementById('doc-domain-select').value = domainMap[type] || 'hiring';
+  document.getElementById('docscan-results').style.display = 'none';
+}
+
+async function scanDocument() {
+  const text = document.getElementById('doc-text-input').value.trim();
+  if (!text) { alert('Please paste or upload a document first.'); return; }
+  const domain = document.getElementById('doc-domain-select').value;
+
+  document.getElementById('docscan-results').style.display = 'none';
+  document.getElementById('docscan-loading').style.display = 'block';
+
+  let prog = 0;
+  const progInterval = setInterval(() => {
+    prog = Math.min(prog + Math.random() * 12, 88);
+    document.getElementById('docscan-progress').style.width = prog + '%';
+  }, 400);
+
+  const domainNames = { hiring: 'job posting / hiring document', loan: 'loan / banking policy', healthcare: 'healthcare eligibility document', education: 'admission / education policy', general: 'general policy document' };
+
+  // Ask Gemma 4 to extract structured bias signals — FairScan's engine scores them
+  const systemPrompt = `You are FairScan India's NLP bias signal extractor. Your job is to extract structured bias signals from the provided ${domainNames[domain]||'document'}.
+
+You MUST respond with ONLY valid JSON — no markdown, no explanation, no preamble. The JSON must follow this exact schema:
+
+{
+  "categories": {
+    "caste": [{"phrase": "exact quote", "reason": "why biased in Indian context"}],
+    "gender": [{"phrase": "exact quote", "reason": "why biased"}],
+    "religion": [{"phrase": "exact quote", "reason": "why biased"}],
+    "regional": [{"phrase": "exact quote", "reason": "why biased"}],
+    "age": [{"phrase": "exact quote", "reason": "why biased"}],
+    "disability": [{"phrase": "exact quote", "reason": "why biased"}]
+  },
+  "summary": "One sentence plain-English explanation of the overall bias level and most critical issues found",
+  "rewrite": "Complete fair rewrite of the document with all biased language removed, preserving the intent"
+}
+
+Rules:
+- Only include phrases that are ACTUALLY present in the document
+- Each phrase must be an exact quote (or close paraphrase) from the document
+- Caste bias includes: "clean background", "good family", community proxies, upper-caste language
+- Gender bias includes: age targeting women, male preference, availability assumptions, maternity risk
+- Regional bias includes: specific language fluency requirements (Hindi), geographic restrictions
+- If no bias found in a category, return an empty array []
+- The rewrite must be complete and professional`;
+
+  try {
+    const raw = await callGemma4(systemPrompt, `Document to analyse:
+
+${text.substring(0, 3000)}`);
+
+    // Parse JSON — strip markdown fences if present
+    let parsed;
+    try {
+      const clean = raw.replace(/```json/g,'').replace(/```/g,'').replace(/\n/g,'').trim();
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      // Fallback: extract what we can
+      parsed = {
+        categories: { caste:[], gender:[], religion:[], regional:[], age:[], disability:[] },
+        summary: raw.substring(0, 300),
+        rewrite: ''
+      };
+    }
+
+    clearInterval(progInterval);
+    document.getElementById('docscan-progress').style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('docscan-loading').style.display = 'none';
+      document.getElementById('docscan-results').style.display = 'block';
+      renderDocScanResults(parsed);
+    }, 300);
+
+  } catch(err) {
+    clearInterval(progInterval);
+    document.getElementById('docscan-loading').style.display = 'none';
+    document.getElementById('docscan-results').style.display = 'block';
+    document.getElementById('ds-summary-text').textContent = '❌ Error: ' + err.message + '. Make sure your API key is set correctly.';
+    setRiskBadge('docscan-risk-badge', 0);
+  }
+}
+
+
+async function checkInterviewBias() {
+  const text = document.getElementById('interview-text-input').value.trim();
+  if (!text) { alert('Please paste interview feedback or a rejection email first.'); return; }
+  const context = document.getElementById('interview-context-select').value;
+
+  document.getElementById('interview-results').style.display = 'none';
+  document.getElementById('interview-loading').style.display = 'block';
+
+  let prog = 0;
+  const progInterval = setInterval(() => {
+    prog = Math.min(prog + Math.random() * 12, 88);
+    document.getElementById('interview-progress').style.width = prog + '%';
+  }, 400);
+
+  const ctxNames = { rejection: 'rejection email', feedback: 'interviewer feedback note', review: 'performance review', decision: 'hiring decision note', reference: 'reference check notes' };
+
+  const systemPrompt = `You are FairScan India's hiring bias signal extractor. Extract structured bias signals from this ${ctxNames[context]||'hiring document'}.
+
+Respond ONLY with valid JSON — no markdown, no preamble:
+
+{
+  "categories": {
+    "caste": [{"phrase": "exact quote", "reason": "coded caste/community bias explanation"}],
+    "gender": [{"phrase": "exact quote", "reason": "gender discrimination explanation"}],
+    "religion": [{"phrase": "exact quote", "reason": "religion bias explanation"}],
+    "regional": [{"phrase": "exact quote", "reason": "regional/accent/language bias explanation"}],
+    "age": [{"phrase": "exact quote", "reason": "age bias explanation"}],
+    "disability": [{"phrase": "exact quote", "reason": "disability bias explanation"}]
+  },
+  "summary": "One sentence plain-English explanation: what kind of bias was found, who is disadvantaged, and legal risk under Indian law",
+  "rewrite": "Complete fair rewrite that removes all discriminatory language while preserving any legitimate performance feedback"
+}
+
+Key patterns to detect for Indian hiring context:
+- Gender: "she might not be available", maternity concerns, travel hesitation assumptions, "commitment" worries about married women
+- Caste: "cultural fit", "similar backgrounds", "traditional", "family values", "vibe mismatch" as caste/community proxies  
+- Regional: accent criticism, "communication issues" for Northeast/South India candidates, local candidate preference
+- Religion: festival availability concerns, dress code objections, prayer time issues
+- Age: "overqualified", "too senior", "young team", "fresh perspective"
+Return empty array [] for categories with no bias found.`;
+
+  try {
+    const raw = await callGemma4(systemPrompt, text.substring(0, 2500));
+
+    let parsed;
+    try {
+      const clean = raw.replace(/```json/g,'').replace(/```/g,'').replace(/\n/g,'').trim();
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      parsed = {
+        categories: { caste:[], gender:[], religion:[], regional:[], age:[], disability:[] },
+        summary: raw.substring(0, 300),
+        rewrite: ''
+      };
+    }
+
+    clearInterval(progInterval);
+    document.getElementById('interview-progress').style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('interview-loading').style.display = 'none';
+      document.getElementById('interview-results').style.display = 'block';
+      renderInterviewResults(parsed);
+    }, 300);
+
+  } catch(err) {
+    clearInterval(progInterval);
+    document.getElementById('interview-loading').style.display = 'none';
+    document.getElementById('interview-results').style.display = 'block';
+    document.getElementById('iv-summary-text').textContent = '❌ Error: ' + err.message;
+    setRiskBadge('interview-risk-badge', 0);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FAIRSCAN TEXT BIAS SCORING ENGINE
+// Gemma 4 extracts signals → FairScan scores them 0-100
+// Same scale as the CSV scanner
+// ══════════════════════════════════════════════════════════════════
+
+function computeTextBiasScore(categories) {
+  const weights = { caste:0.30, gender:0.25, religion:0.20, regional:0.15, age:0.05, disability:0.05 };
+  const lawMap = {
+    caste:      ['SC/ST Prevention of Atrocities Act','Article 15 — Constitution of India','DPDP Act 2023 §4'],
+    gender:     ['Equal Remuneration Act 1976','Maternity Benefit Act 1961','Article 15 — Constitution of India'],
+    religion:   ['Article 15 — Constitution of India','DPDP Act 2023 §4'],
+    regional:   ['Article 16 — Right to Equal Opportunity','DPDP Act 2023 §4'],
+    age:        ['Article 16 — Right to Equal Opportunity','Equal Remuneration Act 1976'],
+    disability: ['RPwD Act 2016','Article 15 — Constitution of India']
+  };
+  let score = 0, totalSignals = 0;
+  const lawsViolated = new Set();
+  Object.entries(categories||{}).forEach(([cat, signals]) => {
+    if (!signals||signals.length===0) return;
+    totalSignals += signals.length;
+    score += Math.min(signals.length * 25, 100) * (weights[cat]||0.1);
+    (lawMap[cat]||[]).forEach(l => lawsViolated.add(l));
+  });
+  return { score: Math.min(Math.round(score), 100), totalSignals, lawsViolated: [...lawsViolated] };
+}
+
+function setRiskBadgeText(badgeId, score) {
+  const b = document.getElementById(badgeId);
+  if (!b) return;
+  if (score >= 70) { b.style.background='var(--g-red-light)';b.style.color='var(--g-red)';b.textContent='🔴 HIGH RISK'; }
+  else if (score >= 35) { b.style.background='var(--g-yellow-light)';b.style.color='#B06000';b.textContent='🟡 MEDIUM RISK'; }
+  else { b.style.background='var(--g-green-light)';b.style.color='var(--g-green)';b.textContent='🟢 LOW RISK'; }
+}
+
+function getRiskLabelText(score) {
+  if (score >= 70) return 'HIGH RISK — Legal action possible';
+  if (score >= 35) return 'MEDIUM RISK — Review recommended';
+  return 'LOW RISK — Minor issues only';
+}
+
+function drawCategoryBars(containerId, categories) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  const meta = {
+    caste:{label:'Caste Bias',color:'var(--g-red)'},
+    gender:{label:'Gender Bias',color:'var(--g-red)'},
+    religion:{label:'Religion Bias',color:'var(--g-yellow)'},
+    regional:{label:'Regional Bias',color:'var(--g-yellow)'},
+    age:{label:'Age Bias',color:'var(--g-blue)'},
+    disability:{label:'Disability Bias',color:'var(--g-blue)'}
+  };
+  Object.entries(categories||{}).forEach(([cat, signals]) => {
+    const m = meta[cat]||{label:cat,color:'var(--g-blue)'};
+    const pct = Math.min((signals?.length||0)*25, 100);
+    const row = document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:12px;';
+    row.innerHTML = `<div style="width:130px;font-size:13px;font-weight:500;color:var(--text2);flex-shrink:0;">${m.label}</div><div style="flex:1;height:10px;background:var(--gray200);border-radius:6px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${m.color};border-radius:6px;transition:width .6s;"></div></div><div style="width:38px;font-size:13px;font-weight:700;color:var(--text);text-align:right;">${pct}%</div><div style="font-size:12px;color:var(--text3);width:60px;">${signals?.length||0} signal${(signals?.length||0)!==1?'s':''}</div>`;
+    el.appendChild(row);
+  });
+}
+
+function drawAlertCards(containerId, categories) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  const sev={caste:'red',gender:'red',religion:'yellow',regional:'yellow',age:'blue',disability:'blue'};
+  const icon={caste:'🚨',gender:'🚨',religion:'⚠️',regional:'⚠️',age:'📋',disability:'📋'};
+  const title={caste:'Caste Bias Detected',gender:'Gender Bias Detected',religion:'Religion Bias Detected',regional:'Regional Bias Detected',age:'Age Bias Detected',disability:'Disability Bias Detected'};
+  Object.entries(categories||{}).forEach(([cat, signals]) => {
+    if (!signals||signals.length===0) return;
+    const div = document.createElement('div');
+    div.className=`alert ${sev[cat]||'blue'}`;
+    div.style.marginBottom='10px';
+    const phrases = signals.map(s=>`<li style="margin:4px 0;font-size:13px;">"<strong>${s.phrase||s}</strong>" — ${s.reason||'Discriminatory under Indian law'}</li>`).join('');
+    div.innerHTML=`<span class="alert-icon">${icon[cat]||'⚠️'}</span><div><div style="font-weight:600;margin-bottom:6px;">Critical — ${title[cat]||cat}</div><ul style="padding-left:16px;margin:0;">${phrases}</ul></div>`;
+    el.appendChild(div);
+  });
+}
+
+function showLegalViolations(listId, cardId, laws) {
+  const card=document.getElementById(cardId), list=document.getElementById(listId);
+  if (!card||!list||!laws.length) return;
+  card.style.display='block';
+  list.innerHTML=laws.map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--g-red-light);border-radius:8px;"><span style="font-size:16px;">⚖️</span><span style="font-size:13px;font-weight:500;color:#C5221F;">${l}</span></div>`).join('');
+}
+
+function showRewrite(cardId, textId, rewrite) {
+  const card=document.getElementById(cardId), el=document.getElementById(textId);
+  if (!card||!el||!rewrite) return;
+  card.style.display='block';
+  el.textContent=rewrite;
+}
+
+function renderDocScanResults(parsed) {
+  const {categories={}, summary='', rewrite=''} = parsed;
+  const {score, totalSignals, lawsViolated} = computeTextBiasScore(categories);
+  const biasTypes = Object.values(categories).filter(v=>v&&v.length>0).length;
+
+  document.getElementById('ds-score').innerHTML = `${score}<span style="font-size:16px;color:var(--text3);">/100</span>`;
+  document.getElementById('ds-risk-label').textContent = getRiskLabelText(score);
+  document.getElementById('ds-signals').textContent = totalSignals;
+  document.getElementById('ds-laws').textContent = lawsViolated.length;
+  setRiskBadgeText('docscan-risk-badge', score);
+  drawCategoryBars('ds-category-bars', categories);
+  document.getElementById('ds-summary-text').textContent = summary || `FairScan detected ${totalSignals} bias signal(s) across ${biasTypes} category(s). Bias Risk Score: ${score}/100.`;
+  drawAlertCards('ds-alert-cards', categories);
+  showLegalViolations('ds-legal-list','ds-legal-card', lawsViolated);
+  if (rewrite) showRewrite('ds-rewrite-card','ds-rewrite-text', rewrite);
+}
+
+function renderInterviewResults(parsed) {
+  const {categories={}, summary='', rewrite=''} = parsed;
+  const {score, totalSignals, lawsViolated} = computeTextBiasScore(categories);
+  const biasTypes = Object.values(categories).filter(v=>v&&v.length>0).length;
+
+  document.getElementById('iv-score').innerHTML = `${score}<span style="font-size:16px;color:var(--text3);">/100</span>`;
+  document.getElementById('iv-risk-label').textContent = getRiskLabelText(score);
+  document.getElementById('iv-phrases').textContent = totalSignals;
+  document.getElementById('iv-laws').textContent = lawsViolated.length;
+  document.getElementById('iv-types').textContent = biasTypes;
+  setRiskBadgeText('interview-risk-badge', score);
+  drawCategoryBars('iv-category-bars', categories);
+  document.getElementById('iv-summary-text').textContent = summary || `FairScan detected ${totalSignals} discriminatory phrase(s) across ${biasTypes} bias type(s). Bias Risk Score: ${score}/100.`;
+  drawAlertCards('iv-alert-cards', categories);
+  if (rewrite) showRewrite('iv-rewrite-card','iv-rewrite-text', rewrite);
 }
 
 </script></body></html>
